@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "content": {
+    "scope": "file",
+    "showExternalReferences": true,
+    "showDatatypes": true,
+    "showGensets": true,
+    "derivedMaterialMode": "both"
+  },
+  "display": {
+    "taxonomyOnly": false,
+    "partonomyOnly": false,
+    "routing": "straight",
+    "fontFamily": "sans",
+    "fontSize": "medium",
+    "showAttributes": true,
+    "showCardinalities": true,
+    "showRelationNames": true,
+    "showRelationStereotypes": true,
+    "showEndDecorations": true,
+    "showRoleNames": true,
+    "showColors": true,
+    "transparentBackground": false,
+    "showLegend": false,
+    "showPackageGroups": true,
+    "qualifyNames": false
+  },
+  "layout": {
+    "direction": "DOWN",
+    "associationDistance": 100,
+    "nodeSpacing": 60,
+    "rankSpacing": 100,
+    "groupByPackage": false
+  },
+  "nodes": {
+    "ontologialongevidade::RegiaoGenomica": {
+      "x": 140,
+      "y": 273
+    },
+    "ontologialongevidade::Gene": {
+      "x": 264,
+      "y": 592
+    },
+    "ontologialongevidade::Variante": {
+      "x": 56,
+      "y": 784
+    },
+    "ontologialongevidade::Organizacao": {
+      "x": 1040,
+      "y": 24
+    },
+    "ontologialongevidade::FonteDeDados": {
+      "x": 827,
+      "y": 12
+    },
+    "ontologialongevidade::BaseDeAssociacoes": {
+      "x": 902,
+      "y": 1045
+    },
+    "ontologialongevidade::CatalogoDeGenes": {
+      "x": 576,
+      "y": 328
+    },
+    "ontologialongevidade::BaseDeNomenclatura": {
+      "x": 381,
+      "y": 273
+    },
+    "ontologialongevidade::OntologiaDeReferencia": {
+      "x": 1224,
+      "y": 272
+    },
+    "ontologialongevidade::Significancia": {
+      "x": 12,
+      "y": 12
+    },
+    "ontologialongevidade::Populacao": {
+      "x": 672,
+      "y": 1160
+    },
+    "ontologialongevidade::PopulacaoEstudada": {
+      "x": 660,
+      "y": 1045
+    },
+    "ontologialongevidade::Publicacao": {
+      "x": 272,
+      "y": 1040
+    },
+    "ontologialongevidade::AssociacaoLongevidade": {
+      "x": 200,
+      "y": 904
+    },
+    "ontologialongevidade::EvidenciaEnvelhecimento": {
+      "x": 544,
+      "y": 584
+    },
+    "ontologialongevidade::TipoCelular": {
+      "x": 1488,
+      "y": 320
+    },
+    "ontologialongevidade::ProcessoBiologico": {
+      "x": 1464,
+      "y": 840
+    },
+    "ontologialongevidade::AnotacaoFuncional": {
+      "x": 1152,
+      "y": 832
+    },
+    "ontologialongevidade::TipoDeVariante": {
+      "x": 1064,
+      "y": 648
+    },
+    "ontologialongevidade::Celula": {
+      "x": 792,
+      "y": 336
+    },
+    "ontologialongevidade::CelulaQuiescente": {
+      "x": 992,
+      "y": 864
+    }
+  },
+  "edges": {}
+}

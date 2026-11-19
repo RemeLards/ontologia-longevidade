@@ -1,0 +1,14 @@
+# Download em 2026-11-18T07:15Z
+dados/hagr/longevity_genes.zip  https://genomics.senescence.info/longevity/longevity_genes.zip  24769 bytes  sha256=5226be2961140bf1
+dados/hagr/human_genes.zip  https://genomics.senescence.info/genes/human_genes.zip  9465 bytes  sha256=cd4b1d63c9a3fb95
+dados/gwas/gwas-catalog-associations_ontology-annotated-full.zip  https://ftp.ebi.ac.uk/pub/databases/gwas/releases/latest/gwas-catalog-associations_ontology-annotated-full.zip  72739430 bytes  sha256=d24750b05a62aafe
+dados/gwas/gwas-catalog-studies.tsv  https://ftp.ebi.ac.uk/pub/databases/gwas/releases/latest/gwas-catalog-studies.tsv  77329933 bytes  sha256=aa35355d96afb078
+dados/gwas/gwas-efo-trait-mappings.tsv  https://ftp.ebi.ac.uk/pub/databases/gwas/releases/latest/gwas-efo-trait-mappings.tsv  19481277 bytes  sha256=f124b50053ec4803
+dados/go/goa_human.gaf.gz  https://current.geneontology.org/annotations/goa_human.gaf.gz  15041996 bytes  sha256=db472faff1785878
+dados/hgnc/hgnc_complete_set.txt  https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt  17007798 bytes  sha256=6df77ac3cbaeb86a
+ontologias-geneticas/go-basic.obo  https://purl.obolibrary.org/obo/go/go-basic.obo  32227785 bytes  sha256=b08d45b268b8c24c
+ontologias-geneticas/cl-basic.obo  https://purl.obolibrary.org/obo/cl/cl-basic.obo  4342430 bytes  sha256=983f2beffbca7c4a
+ontologias-geneticas/cl.owl  https://purl.obolibrary.org/obo/cl.owl  74743295 bytes  sha256=d749cde807aa9314
+ontologias-geneticas/so.obo  https://purl.obolibrary.org/obo/so.obo  1058091 bytes  sha256=22a8f3ec2b49125d
+dados/opcionais/rna_single_cell_type.tsv.zip  https://www.proteinatlas.org/download/tsv/rna_single_cell_type.tsv.zip  16426358 bytes  sha256=2fdc5094f0182400
+dados/opcionais/cellAge.zip  https://genomics.senescence.info/cells/cellAge.zip  21540 bytes  sha256=943506acb3715a8d

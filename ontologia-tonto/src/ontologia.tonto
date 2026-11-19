@@ -1,0 +1,177 @@
+// Ontologia de Referência para a Longevidade Humana
+// Arquivo único: parte genética + fontes de dados + associações.
+
+ontology ontologialongevidade
+
+// ===========================================================================
+// 1. PARTE GENÉTICA
+// Regiões do genoma, contidas na célula (ver seção 6)
+// ===========================================================================
+
+kind RegiaoGenomica {
+    // montagem: string [0..1]      // ex.: GRCh38
+    // cromossomo: string [0..1]
+    // inicio: number [0..1]
+    // fim: number [0..1]
+}
+
+subkind Gene specializes RegiaoGenomica {
+    // hgncId: string [1]           // ex.: HGNC:613
+    // simbolo: string [1]          // ex.: APOE
+    // entrezId: string [0..1]
+}
+
+subkind Variante specializes RegiaoGenomica {
+    // rsId: string [0..1]          // ausente em parte da LongevityMap (ex.: -308G/A)
+    // descricao: string [1]        // rótulo como aparece na fonte
+    // tipoSO: string [0..1]        // IRI do termo da Sequence Ontology (via Ensembl VEP)
+}
+
+// Incompleto: existem outras regiões (promotores, regiões intergênicas etc.)
+disjoint genset TiposDeRegiao {
+    general RegiaoGenomica
+    specifics Gene, Variante
+}
+
+// Associação simples, não parte-todo: variantes intergênicas existem.
+relation Variante [0..*] -- localizadaEm -- [0..*] Gene
+
+// ===========================================================================
+// 2. FONTES DE DADOS
+// Instâncias (criadas nos dados, não aqui):
+//   LongevityMap, GWAS Catalog  -> BaseDeAssociacoes
+//   GenAge-Human                -> CatalogoDeGenes
+//   HGNC                        -> BaseDeNomenclatura
+//   GO, CL, SO                  -> OntologiaDeReferencia
+// ===========================================================================
+
+kind Organizacao {
+    // nome: string [1]             // ex.: HAGR, NHGRI-EBI, HGNC, GO Consortium
+}
+
+kind FonteDeDados {
+    // nome: string [1]             // ex.: LongevityMap
+    // url: string [1]
+    // licenca: string [0..1]       // ex.: CC-BY 4.0
+}
+
+// O "é" da LongevityMap: ela É uma base de associações (instância deste subkind).
+subkind BaseDeAssociacoes specializes FonteDeDados      // variante/gene <-> fenótipo
+subkind CatalogoDeGenes specializes FonteDeDados        // lista curada de genes
+subkind BaseDeNomenclatura specializes FonteDeDados     // identificadores oficiais
+subkind OntologiaDeReferencia specializes FonteDeDados  // vocabulário controlado
+
+disjoint complete genset TiposDeFonte {
+    general FonteDeDados
+    specifics BaseDeAssociacoes, CatalogoDeGenes, BaseDeNomenclatura, OntologiaDeReferencia
+}
+
+relation FonteDeDados [0..*] -- mantidaPor -- [1..*] Organizacao
+
+// ===========================================================================
+// 3. ASSOCIAÇÕES (liga a parte genética às fontes)
+// ===========================================================================
+
+// enum Significancia {
+//     Significativa,
+//     NaoSignificativa
+// }
+
+collective Populacao {
+    // nome: string [1]             // ex.: Dutch, Finnish
+}
+
+role PopulacaoEstudada specializes Populacao
+
+kind Publicacao {
+    // pubmedId: string [1]
+}
+
+// Resultado de um estudo: gene/variante associado (ou não) à longevidade numa população.
+// LongevityMap: Gene(s) quase sempre preenchida; Variant(s) vazia em 16 registros
+// e igual ao nome do gene em 100 -> variante opcional.
+relator AssociacaoLongevidade {
+    // idNaFonte: string [1]        // coluna id da LongevityMap
+    // significancia: Significancia [1]   // [só LongevityMap; GWAS usaria p-valor]
+    @mediation [0..*] -- avaliaGene -- [1..*] (const) Gene
+    @mediation [0..*] -- observadaEm -- [1] (const) PopulacaoEstudada
+    @mediation [0..*] -- relatadaEm -- [1..*] (const) Publicacao
+}
+
+// Variante é opcional (0..*), então não pode ser @mediation (dependência existencial
+// exige ao menos 1). Fica como relação comum.
+relation AssociacaoLongevidade [0..*] -- avaliaVariante -- [0..*] Variante
+
+// De onde veio cada associação (QC5). Só bases de associações (LongevityMap, GWAS).
+relation AssociacaoLongevidade [0..*] -- registradaEm -- [1] BaseDeAssociacoes
+
+// ===========================================================================
+// 4. EVIDÊNCIAS DE ENVELHECIMENTO (GenAge: gene curado, sem associação estatística)
+// ===========================================================================
+
+// Coluna "why" da GenAge (um gene pode ter vários motivos).
+// enum MotivoGenAge {
+//     Mammal,                      // efeito em envelhecimento de mamíferos
+//     Model,                       // efeito em organismo modelo
+//     Cell,                        // envelhecimento celular
+//     Human,                       // evidência direta em humanos
+//     HumanLink,                   // ligação com envelhecimento humano
+//     Functional,                  // relação funcional com genes de envelhecimento
+//     Upstream,                    // regula genes de envelhecimento
+//     Downstream,                  // regulado por genes de envelhecimento
+//     Putative                     // candidato
+// }
+
+// O fato curado: "este gene foi relacionado ao envelhecimento, por estes motivos".
+relator EvidenciaEnvelhecimento {
+    // idNaFonte: string [1]        // coluna GenAge ID
+    // motivo: MotivoGenAge [1..*]
+    @mediation [0..*] -- sobreGene -- [1] (const) Gene
+    // A curadoria só existe porque o catálogo a fez: dependência, não só proveniência.
+    // (Um relator também precisa mediar ao menos duas entidades.)
+    @mediation [0..*] -- curadaPor -- [1] (const) CatalogoDeGenes
+}
+
+// ===========================================================================
+// 5. TERMOS DAS ONTOLOGIAS DE REFERÊNCIA (GO, CL, SO)
+// GO, CL e SO são instâncias de OntologiaDeReferencia; aqui entram os TERMOS delas.
+// Simplificação: cada termo (ex.: GO:0006281 "DNA repair") é tratado como instância,
+// não como tipo de alta ordem (UFO).
+// ===========================================================================
+
+kind ProcessoBiologico           // termos GO (aspecto processo biológico)
+kind TipoDeVariante              // termos SO
+
+relation ProcessoBiologico [0..*] -- processoDefinidoEm -- [1] OntologiaDeReferencia
+relation TipoDeVariante [0..*] -- tipoVarianteDefinidoEm -- [1] OntologiaDeReferencia
+
+// Linha do goa_human.gaf: "o gene X participa do processo Y" (com código de evidência).
+relator AnotacaoFuncional {
+    @mediation [0..*] -- anotaGene -- [1] (const) Gene
+    @mediation [0..*] -- emProcesso -- [1] (const) ProcessoBiologico
+}
+
+relation AnotacaoFuncional [0..*] -- anotadaEm -- [1] OntologiaDeReferencia
+
+
+// SO: classificação da variante (via Ensembl VEP).
+relation Variante [0..*] -- classificadaComo -- [0..*] TipoDeVariante
+
+// ===========================================================================
+// 6. CÉLULA
+// ===========================================================================
+
+kind Celula
+
+// A região genômica está contida na célula (cada célula carrega o genoma).
+@componentOf relation Celula [1..*] <>-- contem -- [0..*] RegiaoGenomica
+
+// Tipo celular específico (hepatócito, neurônio, fibroblasto...), correspondente a um termo da CL.
+// Instanciação: cada termo CL usado vira, no OWL, uma subclasse de TipoCelular com o ID
+// da CL (ex.: CL:0000182 hepatocyte); as células são instâncias dessas subclasses.
+subkind TipoCelular specializes Celula
+
+relation TipoCelular [0..*] -- tipoCelularDefinidoEm -- [1] OntologiaDeReferencia
+
+// QC4: CL diz que o tipo celular é capaz de realizar o processo (capable_of).
+relation TipoCelular [0..*] -- realiza -- [0..*] ProcessoBiologico

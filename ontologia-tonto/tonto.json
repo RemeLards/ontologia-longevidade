@@ -1,0 +1,10 @@
+{
+  "projectName": "OntologiaLongevidade",
+  "displayName": "Ontologia de Referência para a Longevidade Humana",
+  "authors": ["Rafael Fracalossi Freitas", "Breno Uliana De Angelo"],
+  "license": "MIT",
+  "version": "0.1.0",
+  "publisher": "UFES",
+  "outFolder": "generated",
+  "dependencies": {}
+}
