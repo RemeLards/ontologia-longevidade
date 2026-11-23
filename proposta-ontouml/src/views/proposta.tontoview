@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "content": {
+    "scope": "file",
+    "showExternalReferences": true,
+    "showDatatypes": true,
+    "showGensets": true,
+    "derivedMaterialMode": "both"
+  },
+  "display": {
+    "taxonomyOnly": false,
+    "partonomyOnly": false,
+    "routing": "straight",
+    "fontFamily": "sans",
+    "fontSize": "medium",
+    "showAttributes": true,
+    "showCardinalities": true,
+    "showExactlyOne": false,
+    "showRelationNames": true,
+    "showRelationStereotypes": true,
+    "showEndDecorations": true,
+    "showRoleNames": true,
+    "showColors": true,
+    "transparentBackground": false,
+    "showLegend": false,
+    "showPackageGroups": true,
+    "qualifyNames": false
+  },
+  "layout": {
+    "direction": "DOWN",
+    "associationDistance": 100,
+    "nodeSpacing": 60,
+    "rankSpacing": 100,
+    "groupByPackage": false
+  },
+  "nodes": {
+    "propostalongevidade::RegiaoGenomica": {
+      "x": 742,
+      "y": 12
+    },
+    "propostalongevidade::Gene": {
+      "x": 736,
+      "y": 304
+    },
+    "propostalongevidade::Variante": {
+      "x": 528,
+      "y": 296
+    },
+    "propostalongevidade::FonteDeDados": {
+      "x": 693,
+      "y": 707
+    },
+    "propostalongevidade::BaseDeAssociacoes": {
+      "x": 464,
+      "y": 960
+    },
+    "propostalongevidade::CatalogoDeGenes": {
+      "x": 913,
+      "y": 935
+    },
+    "propostalongevidade::BaseDeNomenclatura": {
+      "x": 674,
+      "y": 935
+    },
+    "propostalongevidade::OntologiaDeReferencia": {
+      "x": 1128,
+      "y": 935
+    },
+    "propostalongevidade::Significancia": {
+      "x": 292,
+      "y": 532
+    },
+    "propostalongevidade::Populacao": {
+      "x": 12,
+      "y": 707
+    },
+    "propostalongevidade::PopulacaoEstudada": {
+      "x": 12,
+      "y": 935
+    },
+    "propostalongevidade::Publicacao": {
+      "x": 224,
+      "y": 928
+    },
+    "propostalongevidade::AssociacaoLongevidade": {
+      "x": 360,
+      "y": 690
+    },
+    "propostalongevidade::AssociacaoDeVariante": {
+      "x": 408,
+      "y": 12
+    },
+    "propostalongevidade::MotivoGenAge": {
+      "x": 1052,
+      "y": 362
+    },
+    "propostalongevidade::EvidenciaEnvelhecimento": {
+      "x": 864,
+      "y": 696
+    },
+    "propostalongevidade::ProcessoBiologico": {
+      "x": 1393,
+      "y": 935
+    },
+    "propostalongevidade::AnotacaoFuncional": {
+      "x": 1187,
+      "y": 701
+    },
+    "propostalongevidade::Celula": {
+      "x": 1429,
+      "y": 487
+    },
+    "propostalongevidade::TipoCelular": {
+      "x": 1429,
+      "y": 711
+    }
+  },
+  "edges": {}
+}

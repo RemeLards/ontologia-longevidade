@@ -1,0 +1,170 @@
+// PROPOSTA OntoUML (temporária) — Ontologia de Referência para a Longevidade Humana
+// Aplica as sugestões de AVALIACAO_MODELO.md. O modelo original continua intacto em
+// ontologia-tonto/src/ontologia.tonto. Nome de ontologia diferente para os dois
+// conviverem no mesmo workspace.
+//
+// O que muda em relação ao original:
+//   - toda relação tem estereótipo (nenhuma "relation" solta);
+//   - todo fato (relator) depende da fonte que o afirma, via @mediation;
+//   - variante entra por um subkind do relator (AssociacaoDeVariante), sem 0..*;
+//   - SO e CL viram subclasses no OWL (sai TipoDeVariante); GO fica como instâncias;
+//   - FonteDeDados e Publicacao são subkinds de RecursoInformacional, mantido por Organizacao;
+//   - saem os *DefinidoEm e Celula-contém-RegiaoGenomica;
+//   - voltam só os atributos que as QCs usam.
+
+ontology propostalongevidade
+
+// ===========================================================================
+// 1. REGIÕES GENÔMICAS (genoma de referência: objetos de informação)
+// ===========================================================================
+
+kind RegiaoGenomica
+
+subkind Gene specializes RegiaoGenomica {
+    simbolo: string [1]          // ex.: APOE  (chave para cruzar as bases — QC2)
+    hgncId: string [0..1]        // ex.: HGNC:613
+}
+
+// Tipos de variante da SO (missense_variant, intron_variant...) viram, no OWL,
+// subclasses de Variante: rs7412 a so:missense_variant.
+subkind Variante specializes RegiaoGenomica {
+    rsId: string [0..1]          // ausente em parte da LongevityMap
+    descricao: string [1]        // rótulo da fonte (ex.: -308G/A, E2/E3/E4)
+}
+
+disjoint genset TiposDeRegiao {
+    general RegiaoGenomica
+    specifics Gene, Variante
+}
+
+// Posicional: decorre só das coordenadas das duas regiões (QC1, contexto).
+@formal relation Variante [0..*] -- localizadaEm -- [0..*] Gene
+
+// ===========================================================================
+// 2. RECURSOS INFORMACIONAIS E ORGANIZAÇÕES
+// Tudo o que registra conhecimento (bases, ontologias, artigos) é um
+// RecursoInformacional, mantido/publicado por uma Organizacao.
+// Instâncias: LongevityMap, GWAS Catalog -> BaseDeAssociacoes;
+//             GenAge-Human -> CatalogoDeGenes; HGNC -> BaseDeNomenclatura;
+//             GO, CL, SO -> OntologiaDeReferencia; artigos PubMed -> Publicacao
+//             HAGR, NHGRI-EBI, HGNC, GO Consortium -> Organizacao
+// ===========================================================================
+
+kind Organizacao {
+    nome: string [1]
+}
+
+kind RecursoInformacional
+
+// Conjunto de dados (base, catálogo, ontologia) — o que usamos como fonte.
+subkind FonteDeDados specializes RecursoInformacional {
+    nome: string [1]
+}
+
+// Artigo científico que relata um resultado.
+subkind Publicacao specializes RecursoInformacional {
+    pubmedId: string [1]
+}
+
+// Incompleto: há outros recursos (livros, relatórios...).
+disjoint genset TiposDeRecurso {
+    general RecursoInformacional
+    specifics FonteDeDados, Publicacao
+}
+
+subkind BaseDeAssociacoes specializes FonteDeDados
+subkind CatalogoDeGenes specializes FonteDeDados
+subkind BaseDeNomenclatura specializes FonteDeDados
+subkind OntologiaDeReferencia specializes FonteDeDados
+
+disjoint complete genset TiposDeFonte {
+    general FonteDeDados
+    specifics BaseDeAssociacoes, CatalogoDeGenes, BaseDeNomenclatura, OntologiaDeReferencia
+}
+
+// Quem mantém a base ou publica o artigo (HAGR mantém LongevityMap e GenAge).
+@material relation RecursoInformacional [0..*] -- mantidoPor -- [1..*] Organizacao
+
+// ===========================================================================
+// 3. ASSOCIAÇÃO COM LONGEVIDADE (LongevityMap)
+// Regra do modelo: todo fato é afirmado por uma fonte e depende dela.
+// ===========================================================================
+
+enum Significancia {
+    Significativa,
+    NaoSignificativa
+}
+
+collective Populacao {
+    nome: string [1]             // ex.: Dutch (tratada como rótulo do estudo)
+}
+
+role PopulacaoEstudada specializes Populacao
+
+relator AssociacaoLongevidade {
+    idNaFonte: string [1]
+    significancia: Significancia [1]     // só LongevityMap; GWAS usaria p-valor
+    @mediation [0..*] -- avaliaGene -- [1..*] (const) Gene
+    @mediation [0..*] -- observadaEm -- [1] (const) PopulacaoEstudada
+    @mediation [0..*] -- relatadaEm -- [1..*] (const) Publicacao
+    @mediation [0..*] -- registradaEm -- [1] (const) BaseDeAssociacoes
+}
+
+// Associação que cita variante(s) específica(s). As demais (só gene, 116 registros)
+// ficam no relator geral. Resolve o "@mediation não pode começar em zero".
+subkind AssociacaoDeVariante specializes AssociacaoLongevidade {
+    @mediation [0..*] -- avaliaVariante -- [1..*] (const) Variante
+}
+
+// ===========================================================================
+// 4. EVIDÊNCIA DE ENVELHECIMENTO (GenAge)
+// ===========================================================================
+
+enum MotivoGenAge {
+    Mammal,
+    Model,
+    Cell,
+    Human,
+    HumanLink,
+    Functional,
+    Upstream,
+    Downstream,
+    Putative
+}
+
+relator EvidenciaEnvelhecimento {
+    idNaFonte: string [1]
+    motivo: MotivoGenAge [1..*]
+    @mediation [0..*] -- sobreGene -- [1] (const) Gene
+    @mediation [0..*] -- curadaPor -- [1] (const) CatalogoDeGenes
+}
+
+// ===========================================================================
+// 5. FUNÇÃO (GO)
+// Simplificação documentada: cada termo GO (ex.: GO:0006281 "DNA repair") é uma
+// INSTÂNCIA de ProcessoBiologico, porque o relator AnotacaoFuncional precisa mediar
+// um indivíduo. Na UFO um processo seria perdurant/tipo; dizer isso no texto.
+// ===========================================================================
+
+kind ProcessoBiologico {
+    goId: string [1]
+}
+
+relator AnotacaoFuncional {
+    codigoEvidencia: string [1]  // IDA, IMP (experimental) ... IEA (automática)
+    @mediation [0..*] -- anotaGene -- [1] (const) Gene
+    @mediation [0..*] -- emProcesso -- [1] (const) ProcessoBiologico
+    @mediation [0..*] -- anotadaEm -- [1] (const) OntologiaDeReferencia
+}
+
+// ===========================================================================
+// 6. CÉLULA (CL)
+// Cada termo CL usado vira, no OWL, subclasse de TipoCelular (ex.: CL:0000182).
+// ===========================================================================
+
+kind Celula
+
+subkind TipoCelular specializes Celula
+
+// CL "capable_of": o tipo celular é capaz de realizar o processo (QC4).
+@material relation TipoCelular [0..*] -- realiza -- [0..*] ProcessoBiologico
