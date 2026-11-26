@@ -1,6 +1,6 @@
 {
-  "projectName": "PropostaLongevidade",
-  "displayName": "Proposta OntoUML — Ontologia de Longevidade (temporária)",
+  "projectName": "BiologiaLongevidade",
+  "displayName": "Módulo 1 — Biologia (genes, variantes, processos, células)",
   "authors": ["Rafael Fracalossi Freitas", "Breno Uliana De Angelo"],
   "license": "MIT",
   "version": "0.0.1",

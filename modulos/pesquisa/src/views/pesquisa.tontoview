@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "content": {
+    "scope": "file",
+    "showExternalReferences": true,
+    "showDatatypes": true,
+    "showGensets": true,
+    "derivedMaterialMode": "both"
+  },
+  "display": {
+    "taxonomyOnly": false,
+    "partonomyOnly": false,
+    "routing": "straight",
+    "fontFamily": "sans",
+    "fontSize": "medium",
+    "showAttributes": true,
+    "showCardinalities": true,
+    "showExactlyOne": false,
+    "showRelationNames": true,
+    "showRelationStereotypes": true,
+    "showEndDecorations": true,
+    "showRoleNames": true,
+    "showColors": true,
+    "transparentBackground": false,
+    "showLegend": false,
+    "showPackageGroups": true,
+    "qualifyNames": false
+  },
+  "layout": {
+    "direction": "DOWN",
+    "associationDistance": 100,
+    "nodeSpacing": 60,
+    "rankSpacing": 100,
+    "groupByPackage": false
+  },
+  "nodes": {
+    "pesquisalongevidade::Organizacao": {
+      "x": 408,
+      "y": -8
+    },
+    "pesquisalongevidade::RecursoInformacional": {
+      "x": 128,
+      "y": 0
+    },
+    "pesquisalongevidade::ConjuntoDeDados": {
+      "x": -32,
+      "y": 296
+    },
+    "pesquisalongevidade::Publicacao": {
+      "x": 376,
+      "y": 296
+    },
+    "pesquisalongevidade::Populacao": {
+      "x": 376,
+      "y": 464
+    },
+    "pesquisalongevidade::Estudo": {
+      "x": 368,
+      "y": 312
+    },
+    "pesquisalongevidade::Ontologia": {
+      "x": 184,
+      "y": 176
+    }
+  },
+  "edges": {}
+}

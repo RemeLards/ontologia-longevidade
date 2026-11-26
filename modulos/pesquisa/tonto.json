@@ -1,0 +1,10 @@
+{
+  "projectName": "PesquisaLongevidade",
+  "displayName": "Módulo 2 — Pesquisa e proveniência (de onde vêm os dados)",
+  "authors": ["Rafael Fracalossi Freitas", "Breno Uliana De Angelo"],
+  "license": "MIT",
+  "version": "0.0.1",
+  "publisher": "UFES",
+  "outFolder": "generated",
+  "dependencies": {}
+}

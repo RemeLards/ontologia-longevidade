@@ -1,0 +1,85 @@
+// MÓDULO 2 — PESQUISA E PROVENIÊNCIA
+// De onde vêm os dados: quem mantém, em qual recurso estão, qual estudo os
+// produziu, em que população. Não fala de genes (isso é o módulo 1).
+//
+// Recursos: ConjuntoDeDados (bases) e Ontologia (vocabulários), mantidos por uma
+// Organizacao. O Estudo fica à parte: é a pesquisa de onde o resultado saiu; a
+// base relata estudos, e a publicação é um atributo do estudo (onde foi publicado).
+// Cada base, ontologia e estudo é uma INSTÂNCIA.
+
+// Possíveis problemas deste módulo: ver PROBLEMAS.md (mesma pasta).
+
+ontology pesquisalongevidade
+
+// ===========================================================================
+// QUEM MANTÉM
+// Instâncias: HAGR, NHGRI-EBI, HGNC, GO Consortium, OBO Foundry
+// ===========================================================================
+
+kind Organizacao {
+    nome: string [1]
+}
+
+// ===========================================================================
+// ONDE ESTÁ (recursos informacionais)
+// ===========================================================================
+
+kind RecursoInformacional
+
+// Base de dados que usamos. Instâncias:
+//   LongevityMap, GenAge-Human, GWAS Catalog, HGNC, GO Annotations (GAF), HPA
+subkind ConjuntoDeDados specializes RecursoInformacional {
+    nome: string [1]             // ex.: LongevityMap
+    url: string [1]              // ex.: https://genomics.senescence.info/longevity/
+}
+
+// Vocabulário controlado usado para padronizar os dados. Instâncias: GO, CL, SO
+// (ECO, se entrar). GO (a ontologia) e GO Annotations (o GAF) são recursos
+// diferentes, mantidos pela mesma organização.
+subkind Ontologia specializes RecursoInformacional {
+    nome: string [1]             // ex.: Gene Ontology
+    url: string [1]              // ex.: http://purl.obolibrary.org/obo/go.owl
+}
+
+// Incompleto: há outros recursos (livros, relatórios...).
+disjoint genset TiposDeRecurso {
+    general RecursoInformacional
+    specifics ConjuntoDeDados, Ontologia
+}
+
+// HAGR mantém LongevityMap e GenAge; GO Consortium mantém GO e o GAF.
+relation RecursoInformacional [0..*] -- mantidoPor -- [1..*] Organizacao
+
+// A base usa a ontologia para padronizar (ex.: GAF -> GO). O HPA NÃO usa a CL:
+// o mapeamento HPA -> CL é nosso (ver PROBLEMAS.md, "Fontes e vocabulários").
+relation ConjuntoDeDados [0..*] -- usaVocabulario -- [0..*] Ontologia
+
+// ===========================================================================
+// QUAL ESTUDO (a pesquisa que gerou o resultado)
+// ===========================================================================
+
+// Grupo de pessoas estudado. Na LongevityMap, a coluna Population é o rótulo que
+// o curador tirou do artigo do estudo: texto livre, não padronizado (81 rótulos;
+// ex.: "Italian (Northern)", "Italian (Nothern and Central)" com erro de
+// digitação, "Spanish and Italian" juntando duas).
+// kind (não collective): sem Pessoa no escopo, um collective ficaria sem membros.
+// A população é identificada pelo rótulo do estudo.
+kind Populacao {
+    nome: string [1]             // rótulo como está na fonte
+}
+
+// A pesquisa em si (estudo de associação, experimento de laboratório...).
+// A publicação é só onde o estudo foi publicado: vira atributo.
+kind Estudo {
+    nome: string [1]             // ex.: título do artigo, ou "PMID:1859103" se não houver
+    pubmedId: string [0..1]      // onde foi publicado (LongevityMap: coluna PubMed;
+                                 // GAF: referência PMID:...)
+}
+
+// LongevityMap: todo estudo tem população (8 dos 270 têm mais de uma).
+// GAF: estudos de laboratório não têm população humana -> mínimo 0.
+relation Estudo [0..*] -- observa -- [0..*] Populacao
+
+// A base relata os estudos de onde tirou os registros
+// (LongevityMap relata 270 estudos; o GAF relata os artigos das anotações).
+relation ConjuntoDeDados [0..*] -- relata -- [0..*] Estudo

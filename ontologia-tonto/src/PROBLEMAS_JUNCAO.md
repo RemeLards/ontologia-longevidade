@@ -1,0 +1,151 @@
+# Problemas de modelagem e implementação — `ontologia-nova.tonto`
+
+Revisado em 2026-11-26, com os dados reais (números na seção 4).
+
+As duas categorias de problema:
+- **Modelagem**: limitações do modelo, que devem ser declaradas no texto do trabalho.
+- **Implementação**: regras que o script de instanciação precisa seguir.
+
+Documentos dos módulos:
+- `modulos/biologia/src/FONTES_FORA_DA_PROPOSTA.md`: GAF, HPA e ECO;
+- `modulos/pesquisa/src/PROBLEMAS.md`: estudos, populações e fontes.
+
+---
+
+## 1. Decisões já aplicadas no modelo
+
+| Decisão | Motivo |
+|---|---|
+| `Gene` e `Variante` são kinds; `category ElementoGenomico` acima deles | Identidades diferentes. A category só serve para o relator apontar para "gene ou variante" |
+| `AssociacaoLongevidade avaliaElemento [1..*] ElementoGenomico` | Nem todo registro tem gene (2) ou variante (116), e a `@mediation` não aceita mínimo 0 |
+| `Gene.entrezId [0..1]` | ID estável. A GenAge traz o Entrez nos 307 genes |
+| `Significancia` e `MotivoGenAge` com `SemInformacao` | Deixa a ausência explícita: 2 registros sem significância; genes fora da GenAge |
+| `ProcessoBiologico subprocessoDe ProcessoBiologico` | Hierarquia da GO. Sem ela, "DNA repair" acha 217 genes em vez de 475 |
+| `AnotacaoFuncional ocorreEm Celula` + `ExpressaoGenica` (HPA) | QC4 por dois caminhos: curado (GO + CL) e por expressão (HPA) |
+| `AnotacaoFuncional.referencia [1]` e `baseadaEm [0..1] Estudo` | O GAF tem uma referência por linha |
+| `ExpressaoGenica.nCPM` | A unidade do HPA é nCPM (não TPM) |
+| `Variante.rsId [0..1]`: haplótipo sem rsId | `E2/E3/E4` = rs429358 + rs7412. Fica como Variante só com `descricao` |
+| `Celula.tipoCelular_idCL [1]`: tipo HPA → termo CL mais geral | 155 tipos no HPA, alguns sem termo exato |
+
+---
+
+## 2. Problemas de modelagem (declarar no texto)
+
+Só o que é escolha de modelo. O resto aparece na implementação (seção 3).
+
+| # | Problema | Onde |
+|---|---|---|
+| M1 | **Termos GO e CL são instâncias**, não classes. Na UFO, processo é evento e tipo celular é tipo, mas aqui viram indivíduos para os relatores apontarem para eles | `ProcessoBiologico`, `Celula` |
+| M2 | **"Gene participa do processo" abrevia "o produto do gene participa"**. O GAF anota proteínas e RNAs, não genes | `AnotacaoFuncional` |
+| M3 | **Fenótipo "longevidade" implícito**. Se o GWAS entrar **filtrado** só para traços de longevidade (lista de termos EFO decidida pelo projeto), o modelo continua igual: todas as associações GWAS ficam `Significativa` (o catálogo só publica p ≤ 1e-5), e o p-valor vira atributo opcional. Declarar no texto quais traços contam como "longevidade" | `AssociacaoLongevidade` |
+
+As simplificações do módulo de pesquisa (população e estudo como kind)
+estão em `modulos/pesquisa/src/PROBLEMAS.md`.
+
+---
+
+## 3. Notas de implementação (script e consultas)
+
+Não mudam o modelo. São regras para o script de instanciação e para as consultas, e
+algumas viram uma frase de limitação no texto (marcadas com *texto*).
+
+### 3.1 Identidade de gene (todas as fontes)
+
+- **Normalizar todo gene para o `hgncId`** antes de cruzar. A ordem é:
+  1. Entrez;
+  2. símbolo atual;
+  3. símbolo anterior ou alias da HGNC, só quando for único.
+- Símbolos antigos encontrados:
+  - na GenAge, 4 (ARNTL→BMAL1, H2AFX→H2AX, CTGF→CCN2, ATP5O→ATP5PO);
+  - na LongevityMap, 90 dos 884 não são atuais, e só 28 se resolvem pela HGNC.
+- Os nomes sem solução vão para um log:
+  - `LOC...`;
+  - `LINC...`;
+  - mitocondriais sem `MT-`, como `ATP8`;
+  - símbolos retirados.
+- Hoje a interseção da QC2 dá 125 **por coincidência**: as duas bases usam os mesmos
+  símbolos antigos. A normalização evita que ela quebre.
+
+### 3.2 LongevityMap
+
+- Separar os campos com vários genes (66 registros) e vários rsIDs (154 registros).
+- **Variante = nome do gene** (100 registros) conta como "só gene".
+- **Identidade da variante:** usar o rsID quando houver. Os 434 nomes que não são rsID
+  (`E2/E3/E4`, `I/D`, `677C/T`, `HLA-B40`) ficam só com `descricao`.
+  - Cuidado: o mesmo nome em registros diferentes deve virar a **mesma** Variante.
+- **Significância:** normalizar a grafia (`significant`, `non-significant`,
+  `Non-significant`). Vazio vira `SemInformacao`.
+- A população do registro tem de estar entre as que o `Estudo` observa.
+- *texto*: o CSV não diz qual variante é de qual gene (154 registros com várias
+  variantes, 66 com vários genes). O par se recupera só pela posição (`localizadaEm`).
+- *texto*: o G481 tem 8 rsIDs, sem dizer se é um haplótipo ou se são 8 testes.
+- *texto*: a significância é só sim/não, sem p-valor nem direção do efeito.
+
+### 3.3 GenAge
+
+- Uma `EvidenciaEnvelhecimento` por gene, com `motivo` separado por vírgula (64 genes
+  têm mais de um).
+- Genes da LongevityMap ausentes da GenAge (cerca de 759) recebem uma evidência com
+  `SemInformacao`.
+  - Nas consultas, "genes com evidência" deve excluir esses registros.
+- *texto*: a GenAge é curadoria seletiva (307 genes). A QC2 mede concordância entre
+  curadorias, e o `SemInformacao` é marcação do projeto.
+- QC2 filtrada: oferecer uma versão sem `Putative` (80 genes de evidência fraca).
+
+### 3.4 GAF (anotações GO)
+
+- **Filtrar:**
+  - aspecto `P`;
+  - sem `NOT` (621 linhas);
+  - qualificador `involved_in` (fica fora o "atua a montante de", cerca de 2%);
+  - sem `ND` (102 linhas);
+  - sem ComplexPortal (4.507 linhas de complexos, que não são genes).
+- **Produto → gene:** o símbolo da coluna 3 passa pela normalização da HGNC (3.1).
+  Isoformas se juntam no mesmo gene (44 símbolos têm mais de um UniProt).
+- **`subprocessoDe`:** carregar o `is_a` e o `part_of` do `go-basic.obo`, para todos os
+  termos usados e seus ancestrais.
+- **`ocorreEm`:** extrair `occurs_in(CL:...)` da coluna 16.
+- **`baseadaEm`:** só quando a referência é `PMID:`. As referências `GO_REF`,
+  `Reactome` e `DOI` ficam só no atributo.
+- **Volume:** recortar para os genes da LongevityMap e da GenAge (1.066). As linhas
+  repetidas do mesmo par gene–termo continuam separadas se a evidência for diferente.
+- **QC3, versão padrão:** evidência experimental + IBA. A versão "tudo" inclui IEA.
+
+### 3.5 HPA (expressão)
+
+- Tabela manual **HPA → CL** para os 155 tipos. Quando não houver termo exato, usar o
+  mais geral e marcar como "aproximado". Casos conhecidos:
+  - `other brain neurons`;
+  - `pituicytes/fscs`;
+  - `pancreatic islet cells`;
+  - `myonuclei`.
+- **Recorte:** genes da LongevityMap e da GenAge, com nCPM ≥ 1. O HPA tem 3,1 milhões
+  de linhas, 800 mil delas com zero.
+- **Não instanciar** `HPA usaVocabulario CL`, porque o HPA não usa a CL; o
+  mapeamento é nosso.
+- O relator aceita qualquer `ConjuntoDeDados` como fonte. O script garante a base
+  certa em cada relator.
+
+### 3.6 Estudos (PubMed)
+
+- `Estudo.nome` = título do artigo, via NCBI E-utilities `esummary` (270 PMIDs da
+  LongevityMap, mais os PMIDs do GAF dentro do recorte). Usar chamadas em lote e
+  respeitar o limite de 3 requisições/s sem chave de API.
+
+### 3.7 Versões
+
+- Todo download fica registrado em `VERSOES.txt`, com data e hash. O GAF e a GO saem
+  todo mês.
+
+---
+
+## 4. Números de referência (dados de 2026-11-26)
+
+| Fonte | Números |
+|---|---|
+| LongevityMap | 550 registros: 432 gene + variante, 116 só gene, 2 só variante; 884 nomes de gene; 3.457 nomes de variante (3.023 rsIDs); 270 PMIDs; 81 rótulos de população |
+| GenAge | 307 genes (Build 21, 2023); 9 motivos; interseção com a LongevityMap: 125 |
+| GAF | 906.445 linhas; 204.919 de processo; 11.190 termos; cobertura: LongevityMap 716/884, GenAge 302/307, QC2 122/125 (120 com evidência experimental); 6.705 extensões `occurs_in(CL)`, 46/125 genes da QC2 |
+| GO | todos os termos usados no GAF existem no go-basic; "DNA repair": 217 genes direto, 475 com descendentes |
+| HPA | 3.107.242 linhas; 20.162 genes; 155 tipos celulares; unidade nCPM |
+| CL | 3.893 termos; só 342 com `capable_of` → GO (por isso a QC4 não usa isso) |

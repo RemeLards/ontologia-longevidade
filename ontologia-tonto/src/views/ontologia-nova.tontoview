@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "content": {
+    "scope": "file",
+    "showExternalReferences": true,
+    "showDatatypes": true,
+    "showGensets": true,
+    "derivedMaterialMode": "both"
+  },
+  "display": {
+    "taxonomyOnly": false,
+    "partonomyOnly": false,
+    "routing": "straight",
+    "fontFamily": "sans",
+    "fontSize": "medium",
+    "showAttributes": true,
+    "showCardinalities": true,
+    "showExactlyOne": false,
+    "showRelationNames": true,
+    "showRelationStereotypes": true,
+    "showEndDecorations": true,
+    "showRoleNames": true,
+    "showColors": true,
+    "transparentBackground": false,
+    "showLegend": false,
+    "showPackageGroups": true,
+    "qualifyNames": false
+  },
+  "layout": {
+    "direction": "DOWN",
+    "associationDistance": 100,
+    "nodeSpacing": 60,
+    "rankSpacing": 100,
+    "groupByPackage": false
+  },
+  "nodes": {
+    "longevidadehumana::RegiaoGenomica": {
+      "x": 728,
+      "y": 16
+    },
+    "longevidadehumana::Gene": {
+      "x": 584,
+      "y": 88
+    },
+    "longevidadehumana::Variante": {
+      "x": 888,
+      "y": 96
+    },
+    "longevidadehumana::ProcessoBiologico": {
+      "x": 880,
+      "y": 976
+    },
+    "longevidadehumana::Celula": {
+      "x": 592,
+      "y": 1024
+    },
+    "longevidadehumana::Organizacao": {
+      "x": 40,
+      "y": 1280
+    },
+    "longevidadehumana::RecursoInformacional": {
+      "x": 16,
+      "y": 1160
+    },
+    "longevidadehumana::ConjuntoDeDados": {
+      "x": -96,
+      "y": 720
+    },
+    "longevidadehumana::Ontologia": {
+      "x": 312,
+      "y": 888
+    },
+    "longevidadehumana::Populacao": {
+      "x": 424,
+      "y": 304
+    },
+    "longevidadehumana::Estudo": {
+      "x": 184,
+      "y": 328
+    },
+    "longevidadehumana::Significancia": {
+      "x": -88,
+      "y": -88
+    },
+    "longevidadehumana::AssociacaoLongevidade": {
+      "x": 144,
+      "y": -32
+    },
+    "longevidadehumana::AssociacaoDeGene": {
+      "x": 504,
+      "y": 16
+    },
+    "longevidadehumana::AssociacaoDeVariante": {
+      "x": 960,
+      "y": -136
+    },
+    "longevidadehumana::MotivoGenAge": {
+      "x": -88,
+      "y": 32
+    },
+    "longevidadehumana::EvidenciaEnvelhecimento": {
+      "x": 216,
+      "y": 576
+    },
+    "longevidadehumana::AnotacaoFuncional": {
+      "x": 888,
+      "y": 632
+    },
+    "longevidadehumana::ExpressaoGenica": {
+      "x": 592,
+      "y": 832
+    },
+    "longevidadehumana::ElementoGenomico": {
+      "x": 712,
+      "y": -16
+    }
+  },
+  "edges": {}
+}

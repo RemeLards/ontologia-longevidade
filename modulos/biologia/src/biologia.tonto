@@ -1,0 +1,110 @@
+// MÓDULO 1 — BIOLOGIA
+// Só o que existe no mundo biológico: regiões do genoma, processos e células.
+// Nada aqui diz QUEM afirmou o quê; isso é o módulo 2 (pesquisa), e a junção
+// (quem afirma o quê sobre qual gene) fica para depois.
+// Sem @material: só relatores e relações comuns.
+//
+// ONTOLOGIAS E ARQUIVOS NECESSÁRIOS PARA AS QCs (baixados por baixar_dados.sh)
+// ---------------------------------------------------------------------------
+// Ontologia / arquivo        Para quê                                   Elemento          QC
+// HGNC (hgnc_complete_set)   nome oficial e ID do gene; cruzar as bases Gene.simbolo,     QC1, QC2
+//                            (LongevityMap x GenAge x GAF x HPA)        Gene.hgncId
+// SO   (so.obo)              tipo da variante (missense, intron...)     Variante.tipoSO   QC1
+// GO   (go-basic.obo)        dicionário de processos biológicos e       ProcessoBiologico QC3, QC4
+//                            hierarquia entre eles
+// GAF  (goa_human.gaf.gz)    anotações: qual gene participa de qual     AnotacaoFuncional QC3, QC4
+//                            processo (filtrar aspecto P e sem NOT)
+// CL   (cl-basic.obo)        ID e nome padronizado do tipo celular      Celula.           QC4
+//                                                                       tipoCelular_idCL
+// HPA  (rna_single_cell_     expressão do gene por tipo celular         ExpressaoGenica   QC4
+//       type.tsv)            (nomes do HPA -> IDs da CL por tabela)
+// ECO  (eco.obo) — opcional  agrupar códigos de evidência               AnotacaoFuncional QC3
+//                            (ver FONTES_FORA_DA_PROPOSTA.md, ECO)
+//
+// Fora deste módulo: LongevityMap, GenAge-Human e GWAS Catalog são as fontes dos
+// resultados (QC1, QC2, QC5) e entram na junção com o módulo de pesquisa.
+// GAF, HPA e ECO não estão no PDF da proposta: ver FONTES_FORA_DA_PROPOSTA.md.
+
+ontology biologialongevidade
+
+// ===========================================================================
+// GENES E VARIANTES (genoma de referência)
+// ===========================================================================
+
+// Category (não-sortal rígido): agrupa dois kinds com identidades diferentes,
+// Gene e Variante, só para o relator poder apontar para "gene ou variante".
+// Não é mixin: mixin é semirrígido; gene e variante são sempre o que são.
+category ElementoGenomico
+
+kind Gene {
+    simbolo: string [1]          // ex.: APOE (nome oficial da HGNC)
+    hgncId: string [0..1]        // ex.: HGNC:613
+    entrezId: string [0..1]      // ex.: 348 (NCBI Gene; não muda; GenAge traz em todos)
+}
+
+kind Variante {
+    rsId: string [0..1]          // ex.: rs7412 (falta em parte da LongevityMap)
+    descricao: string [1]        // rótulo da fonte (ex.: -308G/A, E2/E3/E4)
+    tipoSO: string [0..*]        // termo(s) da Sequence Ontology, ex.: SO:0001583 missense_variant
+                                 // vários porque o tipo muda conforme o transcrito
+}
+
+// Incompleto: outros elementos (promotores, enhancers) podem entrar depois.
+disjoint genset TiposDeElemento {
+    general ElementoGenomico
+    specifics Gene, Variante
+}
+
+// Relação comum: decorre só da posição das duas regiões, sem nada no meio.
+// 0..* porque há variantes intergênicas e genes sobrepostos.
+relation Variante [0..*] -- localizadaEm -- [0..*] Gene
+
+// ===========================================================================
+// PROCESSOS BIOLÓGICOS (GO)
+// Simplificação: cada termo GO (ex.: GO:0006281 "DNA repair") é uma instância.
+// ===========================================================================
+
+kind ProcessoBiologico {
+    goId: string [1]
+}
+
+// Hierarquia da GO entre os termos (is_a e part_of do go-basic). Auto-relação:
+// cada termo aponta para o(s) pai(s); a GO é acíclica (DAG, pode ter vários pais).
+// Sem ela, "DNA repair" acha 217 genes em vez de 475 (anotações vão no termo mais
+// específico). No SPARQL: ?p :subprocessoDe* go:GO_0006281
+relation ProcessoBiologico [0..*] -- subprocessoDe -- [0..*] ProcessoBiologico
+
+// Relator: "o gene X participa do processo Y", com o tipo de evidência.
+// O mesmo par gene-processo pode ter várias anotações (evidências diferentes).
+relator AnotacaoFuncional {
+    codigoEvidencia: string [1]  // GO Evidence Code: IDA, IMP (experimental) ... IEA (automática)
+                                 // talvez mapear para a ECO (ver FONTES_FORA_DA_PROPOSTA.md, ECO)
+    referencia: string [1]       // coluna 6 do GAF: PMID:... (artigo) ou GO_REF:... (método)
+    @mediation [0..*] -- anotaGene -- [1] (const) Gene
+    @mediation [0..*] -- emProcesso -- [1] (const) ProcessoBiologico
+}
+
+// ===========================================================================
+// CÉLULAS (CL)
+// O tipo celular é só um atributo (ID do termo CL), para ficar documentado.
+// Cada instância representa as células de um tipo, como o HPA mede.
+// ===========================================================================
+
+kind Celula {
+    tipoCelular_idCL: string [1]     // ex.: CL:0000182 (hepatocyte)
+}
+
+// Contexto celular da própria anotação GO (coluna 16 do GAF: occurs_in(CL:...)).
+// Caminho da QC4 só com GO + CL; convive com o HPA (ExpressaoGenica).
+// Parcial: 46 dos 125 genes da QC2 têm esse contexto (124 tipos CL).
+relation AnotacaoFuncional [0..*] -- ocorreEm -- [0..*] Celula
+
+// Relator: "o gene X é expresso nas células do tipo Y" (Human Protein Atlas,
+// rna_single_cell_type). Liga a célula ao processo PELO GENE (QC4):
+//   Celula <- ExpressaoGenica -> Gene <- AnotacaoFuncional -> ProcessoBiologico
+// Substitui o antigo "realiza" direto (CL capable_of cobre só 342 de 3.893 tipos).
+relator ExpressaoGenica {
+    nCPM: number [1]                 // nível de expressão no tipo celular
+    @mediation [0..*] -- expressaGene -- [1] (const) Gene
+    @mediation [0..*] -- emCelula -- [1] (const) Celula
+}

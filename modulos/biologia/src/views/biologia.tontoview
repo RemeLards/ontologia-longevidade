@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "content": {
+    "scope": "file",
+    "showExternalReferences": true,
+    "showDatatypes": true,
+    "showGensets": true,
+    "derivedMaterialMode": "both"
+  },
+  "display": {
+    "taxonomyOnly": false,
+    "partonomyOnly": false,
+    "routing": "straight",
+    "fontFamily": "sans",
+    "fontSize": "medium",
+    "showAttributes": true,
+    "showCardinalities": true,
+    "showExactlyOne": false,
+    "showRelationNames": true,
+    "showRelationStereotypes": true,
+    "showEndDecorations": true,
+    "showRoleNames": true,
+    "showColors": true,
+    "transparentBackground": false,
+    "showLegend": false,
+    "showPackageGroups": true,
+    "qualifyNames": false
+  },
+  "layout": {
+    "direction": "DOWN",
+    "associationDistance": 100,
+    "nodeSpacing": 60,
+    "rankSpacing": 100,
+    "groupByPackage": false
+  },
+  "nodes": {
+    "biologialongevidade::Gene": {
+      "x": 688,
+      "y": 320
+    },
+    "biologialongevidade::Variante": {
+      "x": 357,
+      "y": 213
+    },
+    "biologialongevidade::VarianteCodificante": {
+      "x": 256,
+      "y": 456
+    },
+    "biologialongevidade::VarianteIntronica": {
+      "x": 48,
+      "y": 456
+    },
+    "biologialongevidade::VarianteIntergenica": {
+      "x": 432,
+      "y": 464
+    },
+    "biologialongevidade::ProcessoBiologico": {
+      "x": 624,
+      "y": 560
+    },
+    "biologialongevidade::AnotacaoFuncional": {
+      "x": 352,
+      "y": 560
+    },
+    "biologialongevidade::Celula": {
+      "x": 896,
+      "y": 344
+    },
+    "biologialongevidade::TipoCelular": {
+      "x": 896,
+      "y": 568
+    },
+    "biologialongevidade::ExpressaoGenica": {
+      "x": 800,
+      "y": 496
+    },
+    "biologialongevidade::ElementoGenomico": {
+      "x": 488,
+      "y": 16
+    }
+  },
+  "edges": {}
+}

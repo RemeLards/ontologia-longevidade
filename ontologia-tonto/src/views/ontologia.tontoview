@@ -33,10 +33,6 @@
     "groupByPackage": false
   },
   "nodes": {
-    "ontologialongevidade::RegiaoGenomica": {
-      "x": 140,
-      "y": 273
-    },
     "ontologialongevidade::Gene": {
       "x": 264,
       "y": 592
@@ -116,6 +112,10 @@
     "ontologialongevidade::CelulaQuiescente": {
       "x": 992,
       "y": 864
+    },
+    "ontologialongevidade::ElementoGenomico": {
+      "x": 140,
+      "y": 273
     }
   },
   "edges": {}

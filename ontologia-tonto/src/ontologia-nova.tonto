@@ -1,0 +1,219 @@
+// ONTOLOGIA DE REFERÊNCIA PARA A LONGEVIDADE HUMANA — versão nova (junção)
+// Junta os dois módulos avaliados por partes:
+//   modulos/biologia/  -> seções 1 a 3 (genes, variantes, processos, células)
+//   modulos/pesquisa/  -> seções 4 e 5 (organizações, recursos, estudos)
+// e acrescenta a seção 6: os relatores que dizem QUEM afirma O QUÊ sobre qual gene.
+// O modelo antigo continua em ontologia.tonto (mesma pasta).
+//
+// Regras do modelo:
+//   - todo fato (relator) depende da fonte que o afirma (@mediation para a base);
+//   - sem @material: só relatores e relações comuns;
+//   - termos de GO, SO e CL entram como ID (atributo ou instância), não como classe.
+//
+// Caminhos das questões de competência:
+//   QC1  Gene/Variante <- avaliaElemento <- AssociacaoLongevidade (significancia)
+//   QC2  Gene avaliado numa AssociacaoLongevidade E com EvidenciaEnvelhecimento
+//   QC3  Gene <- AnotacaoFuncional -> ProcessoBiologico
+//   QC4  (a) ProcessoBiologico <- AnotacaoFuncional -> ocorreEm -> Celula      (GO + CL)
+//        (b) ProcessoBiologico <- AnotacaoFuncional -> Gene <- ExpressaoGenica -> Celula (HPA)
+//   QC5  qualquer relator -> registradaEm/curadaPor/anotadaEm/medidaEm -> ConjuntoDeDados
+//
+// Documentação: AVALIACAO_MODELO.md (estado geral)
+//               modulos/biologia/src/FONTES_FORA_DA_PROPOSTA.md
+//               modulos/pesquisa/src/PROBLEMAS.md
+//               ontologia-tonto/src/PROBLEMAS_JUNCAO.md (modelagem e implementação)
+
+ontology longevidadehumana
+
+// ===========================================================================
+// 1. GENES E VARIANTES (genoma de referência)                  [mód. biologia]
+// ===========================================================================
+
+// Category (não-sortal rígido): agrupa dois kinds com identidades diferentes,
+// Gene e Variante, só para o relator poder apontar para "gene ou variante".
+// Não é mixin: mixin é semirrígido; gene e variante são sempre o que são.
+category ElementoGenomico
+
+kind Gene {
+    simbolo: string [1]          // ex.: APOE (nome oficial da HGNC)
+    hgncId: string [0..1]        // ex.: HGNC:613
+    entrezId: string [0..1]      // ex.: 348 (NCBI Gene; não muda; GenAge traz em todos)
+}
+
+kind Variante {
+    rsId: string [0..1]          // ex.: rs7412 (falta em parte da LongevityMap)
+                                 // haplótipo (E2/E3/E4 = rs429358+rs7412) fica sem rsId,
+                                 // só com descricao (PROBLEMAS_JUNCAO.md, seção 1)
+    descricao: string [1]        // rótulo da fonte (ex.: -308G/A, E2/E3/E4)
+    tipoSO: string [0..*]        // termo(s) da Sequence Ontology, ex.: SO:0001583 missense_variant
+}
+
+// Incompleto: outros elementos (promotores, enhancers) podem entrar depois.
+disjoint genset TiposDeElemento {
+    general ElementoGenomico
+    specifics Gene, Variante
+}
+
+// Relação comum: decorre só da posição. 0..* (variantes intergênicas, genes sobrepostos).
+relation Variante [0..*] -- localizadaEm -- [0..*] Gene
+
+// ===========================================================================
+// 2. PROCESSOS BIOLÓGICOS (GO)                                [mód. biologia]
+// Cada termo GO (ex.: GO:0006281 "DNA repair") é uma instância.
+// ===========================================================================
+
+kind ProcessoBiologico {
+    goId: string [1]             // ID do termo GO (não do gene)
+}
+
+// Hierarquia da GO entre os termos (is_a e part_of do go-basic). Auto-relação:
+// cada termo aponta para o(s) pai(s); a GO é acíclica (DAG, pode ter vários pais).
+// Sem ela, "DNA repair" acha 217 genes em vez de 475 (anotações vão no termo mais
+// específico). No SPARQL: ?p :subprocessoDe* go:GO_0006281
+relation ProcessoBiologico [0..*] -- subprocessoDe -- [0..*] ProcessoBiologico
+
+// ===========================================================================
+// 3. CÉLULAS (CL)                                             [mód. biologia]
+// ===========================================================================
+
+kind Celula {
+    tipoCelular_idCL: string [1]     // ex.: CL:0000182 (hepatocyte)
+                                     // tipo do HPA sem termo exato -> termo CL mais geral
+                                     // (ex.: "other brain neurons" -> CL:0000540 neuron)
+}
+
+// Contexto celular da própria anotação GO (coluna 16 do GAF: occurs_in(CL:...)).
+// Caminho da QC4 só com GO + CL; convive com o HPA (ExpressaoGenica).
+// Parcial: 46 dos 125 genes da QC2 têm esse contexto (124 tipos CL).
+relation AnotacaoFuncional [0..*] -- ocorreEm -- [0..*] Celula
+
+// ===========================================================================
+// 4. ORGANIZAÇÕES E RECURSOS                                  [mód. pesquisa]
+// ===========================================================================
+
+kind Organizacao {
+    nome: string [1]             // ex.: HAGR, NHGRI-EBI, HGNC, GO Consortium
+}
+
+kind RecursoInformacional
+
+// Instâncias: LongevityMap, GenAge-Human, GWAS Catalog, HGNC, GO Annotations (GAF), HPA
+subkind ConjuntoDeDados specializes RecursoInformacional {
+    nome: string [1]
+    url: string [1]
+}
+
+// Instâncias: GO, CL, SO
+subkind Ontologia specializes RecursoInformacional {
+    nome: string [1]
+    url: string [1]
+}
+
+disjoint genset TiposDeRecurso {
+    general RecursoInformacional
+    specifics ConjuntoDeDados, Ontologia
+}
+
+relation RecursoInformacional [0..*] -- mantidoPor -- [1..*] Organizacao
+
+// Ex.: GAF -> GO. O HPA NÃO usa a CL (o mapeamento é nosso).
+relation ConjuntoDeDados [0..*] -- usaVocabulario -- [0..*] Ontologia
+
+// ===========================================================================
+// 5. ESTUDOS E POPULAÇÕES                                     [mód. pesquisa]
+// ===========================================================================
+
+// Rótulo tirado do artigo pelo curador; texto livre (81 rótulos na LongevityMap).
+// kind (não collective): sem Pessoa no escopo, um collective ficaria sem membros.
+// A população é identificada pelo rótulo do estudo.
+kind Populacao {
+    nome: string [1]
+}
+
+kind Estudo {
+    nome: string [1]             // título do artigo (via PubMed) ou "PMID:..."
+    pubmedId: string [0..1]      // onde foi publicado
+}
+
+relation Estudo [0..*] -- observa -- [0..*] Populacao
+
+relation ConjuntoDeDados [0..*] -- relata -- [0..*] Estudo
+
+// ===========================================================================
+// 6. JUNÇÃO: OS FATOS (relatores que ligam biologia e pesquisa)       [novo]
+// ===========================================================================
+
+// --- 6.1 LongevityMap: associação com longevidade -------------------------
+
+enum Significancia {
+    Significativa,
+    NaoSignificativa,
+    SemInformacao                // 2 registros com a coluna Association vazia
+}
+
+// Um registro da LongevityMap: resultado de um estudo, numa população, sobre um
+// ou mais genes/variantes. Media a category ElementoGenomico: cada registro avalia
+// ao menos um elemento, mas não necessariamente um gene (2 registros só têm
+// variante) nem uma variante (116 só têm gene). Se é gene ou variante, diz o kind.
+//   432 registros: gene + variante | 116: só gene | 2: só variante
+relator AssociacaoLongevidade {
+    idNaFonte: string [1]                // coluna id (ex.: G481)
+    significancia: Significancia [1]     // vazia na fonte -> SemInformacao
+    @mediation [0..*] -- avaliaElemento -- [1..*] (const) ElementoGenomico
+    @mediation [0..*] -- obtidaEm -- [1] (const) Estudo
+    @mediation [0..*] -- observadaEm -- [1] (const) Populacao
+    @mediation [0..*] -- registradaEm -- [1] (const) ConjuntoDeDados
+}
+
+// --- 6.2 GenAge: evidência de envelhecimento -------------------------------
+
+// Coluna "why" da GenAge (um gene pode ter vários motivos).
+enum MotivoGenAge {
+    Functional,
+    Putative,
+    Mammal,
+    Downstream,
+    Upstream,
+    Model,
+    Cell,
+    HumanLink,
+    Human,
+    SemInformacao                // gene sem registro na GenAge (ver PROBLEMAS_JUNCAO.md, 3.3)
+}
+
+// Curadoria: "este gene tem relação com envelhecimento, por estes motivos".
+// Sem Estudo: a fonte citada é a própria GenAge.
+// Genes da LongevityMap ausentes da GenAge recebem motivo SemInformacao (criado pelo
+// nosso script, não pela HAGR): deixa explícito que a GenAge não diz nada sobre eles.
+relator EvidenciaEnvelhecimento {
+    idNaFonte: string [1]                // coluna GenAge ID
+    motivo: MotivoGenAge [1..*]
+    @mediation [0..*] -- sobreGene -- [1] (const) Gene
+    @mediation [0..*] -- curadaPor -- [1] (const) ConjuntoDeDados
+}
+
+// --- 6.3 GAF: anotação funcional (gene participa de processo) --------------
+
+// Uma linha do goa_human.gaf (aspecto P, sem qualificador NOT).
+relator AnotacaoFuncional {
+    codigoEvidencia: string [1]  // GO Evidence Code: IDA, IMP ... IEA (talvez ECO)
+    referencia: string [1]       // PMID:... ou GO_REF:... (método)
+    @mediation [0..*] -- anotaGene -- [1] (const) Gene
+    @mediation [0..*] -- emProcesso -- [1] (const) ProcessoBiologico
+    @mediation [0..*] -- anotadaEm -- [1] (const) ConjuntoDeDados
+}
+
+// Quando a referência é um PMID, a anotação se apoia num estudo.
+// Relação comum [0..1]: uma referência por linha (no máximo um estudo);
+// anotações IEA/GO_REF não vêm de estudo.
+relation AnotacaoFuncional [0..*] -- baseadaEm -- [0..1] Estudo
+
+// --- 6.4 HPA: expressão do gene por tipo celular ---------------------------
+// Recorte: só genes da LongevityMap/GenAge e nCPM >= 1 (o HPA tem 3,1 mi linhas).
+
+relator ExpressaoGenica {
+    nCPM: number [1]             // nível de expressão (unidade do HPA: normalized counts per million)
+    @mediation [0..*] -- expressaGene -- [1] (const) Gene
+    @mediation [0..*] -- emCelula -- [1] (const) Celula
+    @mediation [0..*] -- medidaEm -- [1] (const) ConjuntoDeDados
+}
