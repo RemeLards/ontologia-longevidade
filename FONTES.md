@@ -2,10 +2,9 @@
 
 Revisado em 2026-11-26. Links conferidos (HTTP 200).
 
-Para baixar, use `bash baixar_dados.sh`, com estas opções:
-- `--gwas`: inclui o GWAS Catalog;
+Para baixar, use `bash baixar_dados.sh` (tudo o que a proposta usa: cerca de 310 MB
+baixados e 1,2 GB descompactados), com estas opções:
 - `--opcionais`: inclui ECO e HANCESTRO;
-- `--tudo`: inclui tudo;
 - `-f`: baixa de novo.
 
 As versões baixadas ficam registradas em `VERSOES.txt`. O modelo é
@@ -24,11 +23,17 @@ As versões baixadas ficam registradas em `VERSOES.txt`. O modelo é
 | Cell Ontology | https://obofoundry.org/ontology/cl.html | `cl-basic.obo` | 4 MB | sim | `Celula.tipoCelular_idCL` | QC4 |
 | Sequence Ontology | https://obofoundry.org/ontology/so.html | `so.obo` | 1 MB | sim | `Variante.tipoSO` | QC1 |
 
-## Na proposta, ainda fora do modelo (`--gwas`)
+## GWAS Catalog (proposta [3]; filtrado para traços de longevidade)
 
-| Fonte | Página | Arquivos | Tamanho | O que falta no modelo |
-|---|---|---|---|---|
-| GWAS Catalog (NHGRI-EBI) | https://www.ebi.ac.uk/gwas/docs/file-downloads | `gwas-catalog-associations_ontology-annotated-full.zip`, `gwas-catalog-studies.tsv`, `gwas-efo-trait-mappings.tsv` | ~170 MB | filtro por traços de longevidade (EFO); opcional `pValor` (PROBLEMAS_JUNCAO.md, M3) |
+| Arquivo | Tamanho | Uso |
+|---|---|---|
+| `gwas-catalog-associations_ontology-annotated-full.zip` | 73 MB (750 MB descompactado) | associações (QC1, QC5). Filtro por `MAPPED_TRAIT_URI`: EFO_0007796 *parental longevity*, OBA_VT0005372 *life span*, EFO_0009762 *healthspan*, EFO_0005056 *age at death*, EFO_0022597 *aging* → **708 associações, 49 estudos, 28 PMIDs** |
+| `gwas-catalog-studies.tsv` | 82 MB | dados do estudo (`Estudo`) |
+| `gwas-catalog-ancestry.tsv` | 54 MB | ancestralidade e país de cada estudo (`Populacao`) |
+| `gwas-efo-trait-mappings.tsv` | 19 MB | traço → EFO (conferir o filtro) |
+
+Na página https://www.ebi.ac.uk/gwas/docs/file-downloads o servidor costuma ser lento
+(~100 KB/s).
 
 ## Opcionais, fora da proposta (`--opcionais`)
 
@@ -71,7 +76,7 @@ As referências [8] a [11] entraram depois e foram aceitas.
 |---|---|---|---|
 | [1] | HAGR. *LongevityMap*. Artigo: Budovsky et al. 2013, *Aging Cell* 12(2):320 | proposta | QC1, QC2, QC5 |
 | [2] | HAGR. *GenAge–Human*. Artigo: Tacutu et al. 2018, *NAR* 46(D1):D1083 | proposta | QC2 |
-| [3] | NHGRI–EBI. *GWAS Catalog* | proposta ("poderá"); **ainda não modelado** | — |
+| [3] | NHGRI–EBI. *GWAS Catalog* | proposta; filtrado para longevidade | QC1, QC5 |
 | [4] | Gene Ontology Consortium. *Gene Ontology (GO)* | proposta | QC3, QC4 |
 | [5] | OBO Foundry. *Cell Ontology (CL)* | proposta | QC4 |
 | [6] | Sequence Ontology. *Sequence Ontology (SO)* | proposta | QC1 (`tipoSO`) |

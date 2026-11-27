@@ -71,6 +71,7 @@ kind Populacao {
 // A pesquisa em si (estudo de associação, experimento de laboratório...).
 // A publicação é só onde o estudo foi publicado: vira atributo.
 kind Estudo {
+    idNaFonte: string [0..1]     // GWAS: código do estudo (ex.: GCST005467)
     nome: string [1]             // ex.: título do artigo, ou "PMID:1859103" se não houver
     pubmedId: string [0..1]      // onde foi publicado (LongevityMap: coluna PubMed;
                                  // GAF: referência PMID:...)

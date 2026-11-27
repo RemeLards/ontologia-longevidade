@@ -11,7 +11,7 @@ ontology ontologialongevidade
 // Category (não-sortal rígido): agrupa dois kinds com identidades diferentes,
 // Gene e Variante, só para o relator poder apontar para "gene ou variante".
 // Não é mixin: mixin é semirrígido; gene e variante são sempre o que são.
-category ElementoGenomico {
+category ElementoGenomico of functional-complexes {
     // montagem: string [0..1]      // ex.: GRCh38
     // cromossomo: string [0..1]
     // inicio: number [0..1]
@@ -167,7 +167,7 @@ relation Variante [0..*] -- classificadaComo -- [0..*] TipoDeVariante
 kind Celula
 
 // A região genômica está contida na célula (cada célula carrega o genoma).
-@componentOf relation Celula [1..*] <>-- contem -- [0..*] ElementoGenomico
+@componenthood relation Celula [1..*] <>-- contem -- [0..*] ElementoGenomico
 
 // Tipo celular específico (hepatócito, neurônio, fibroblasto...), correspondente a um termo da CL.
 // Instanciação: cada termo CL usado vira, no OWL, uma subclasse de TipoCelular com o ID

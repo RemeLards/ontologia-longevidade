@@ -4,10 +4,8 @@
 #   ./ontologias-geneticas/  ontologias reutilizadas (GO, CL, SO; ECO e HANCESTRO opcionais)
 #
 # Uso:
-#   bash baixar_dados.sh               # só o que o modelo usa (~260 MB descompactado)
-#   bash baixar_dados.sh --gwas        # + GWAS Catalog (~170 MB; na proposta, ainda fora do modelo)
-#   bash baixar_dados.sh --opcionais   # + ECO, mapeamento GAF->ECO, HANCESTRO (~3 MB)
-#   bash baixar_dados.sh --tudo        # tudo acima
+#   bash baixar_dados.sh               # tudo o que a proposta usa + fontes aceitas (GAF, HPA): ~310 MB baixados, ~1,2 GB descompactado
+#   bash baixar_dados.sh --opcionais   # + ECO, mapeamento GAF->ECO, HANCESTRO (~3 MB; não usados ainda)
 #   -f                                 # baixa de novo mesmo se o arquivo já existir
 #
 # Reexecutar é seguro: arquivos já baixados são pulados. Cada download é registrado em
@@ -19,12 +17,10 @@
 set -euo pipefail
 
 cd "$(dirname "$0")"
-GWAS=0; OPCIONAIS=0; FORCAR=0
+OPCIONAIS=0; FORCAR=0
 for a in "$@"; do
   case "$a" in
-    --gwas) GWAS=1 ;;
     --opcionais) OPCIONAIS=1 ;;
-    --tudo) GWAS=1; OPCIONAIS=1 ;;
     -f) FORCAR=1 ;;
     *) echo "opção desconhecida: $a" >&2; exit 1 ;;
   esac
@@ -32,12 +28,13 @@ done
 
 D=dados
 O=ontologias-geneticas
-mkdir -p "$D"/{hagr,go,hgnc,hpa} "$O"
+mkdir -p "$D"/{hagr,gwas,go,hgnc,hpa} "$O"
 LOG="VERSOES.txt"
 echo "# Download em $(date -u +%Y-%m-%dT%H:%MZ)" >> "$LOG"
 
 baixar() {  # baixar <pasta> <url> [nome do arquivo]
-  local pasta=$1 url=$2 nome=${3:-$(basename "$url")}
+  local pasta=$1 url=$2
+  local nome=${3:-$(basename "$url")}
   local arq="$pasta/$nome"
   if [[ -s $arq && $FORCAR == 0 ]]; then echo "-- já existe: $arq"; return; fi
   echo ">> $url"
@@ -57,14 +54,12 @@ baixar $O https://purl.obolibrary.org/obo/go/go-basic.obo    # GO  (processos + 
 baixar $O https://purl.obolibrary.org/obo/cl/cl-basic.obo    # CL  (IDs e nomes dos tipos celulares)
 baixar $O https://purl.obolibrary.org/obo/so.obo             # SO  (Variante.tipoSO)
 
-# --- GWAS Catalog (na proposta; ainda não modelado) -------------------------
-if [[ $GWAS == 1 ]]; then
-  mkdir -p $D/gwas
-  GW=https://ftp.ebi.ac.uk/pub/databases/gwas/releases/latest
-  baixar $D/gwas $GW/gwas-catalog-associations_ontology-annotated-full.zip
-  baixar $D/gwas $GW/gwas-catalog-studies.tsv
-  baixar $D/gwas $GW/gwas-efo-trait-mappings.tsv
-fi
+# --- GWAS Catalog (proposta [3]; filtrado para traços de longevidade) ------
+GW=https://ftp.ebi.ac.uk/pub/databases/gwas/releases/latest
+baixar $D/gwas $GW/gwas-catalog-associations_ontology-annotated-full.zip   # associações (QC1, QC5)
+baixar $D/gwas $GW/gwas-catalog-studies.tsv                                # estudos (Estudo)
+baixar $D/gwas $GW/gwas-catalog-ancestry.tsv                               # população de cada estudo (Populacao)
+baixar $D/gwas $GW/gwas-efo-trait-mappings.tsv                             # traço -> EFO (escolher o filtro)
 
 # --- Opcionais (fora da proposta; ver documentação dos módulos) -------------
 if [[ $OPCIONAIS == 1 ]]; then
@@ -77,6 +72,7 @@ fi
 for z in "$D"/hagr/*.zip; do
   [[ -f $z ]] && unzip -oq "$z" -d "${z%.zip}"
 done
+[[ -f $D/gwas/gwas-catalog-associations_ontology-annotated-full.zip ]] && unzip -oq "$D/gwas/gwas-catalog-associations_ontology-annotated-full.zip" -d "$D/gwas"
 [[ -f $D/hpa/rna_single_cell_type.tsv.zip ]] && unzip -oq "$D/hpa/rna_single_cell_type.tsv.zip" -d "$D/hpa"
 
 echo; echo "Pronto. Versões registradas em $LOG"; du -sh "$D"/* "$O"

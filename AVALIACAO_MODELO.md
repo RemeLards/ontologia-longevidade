@@ -35,7 +35,7 @@ OWL, o script de instanciação e as consultas SPARQL (seção 5).
 |---|---|
 | Biologia | `category ElementoGenomico` → kinds `Gene`, `Variante`; kinds `ProcessoBiologico`, `Celula` |
 | Proveniência | `Organizacao`; `RecursoInformacional` → `ConjuntoDeDados`, `Ontologia`; `Estudo`; `Populacao` |
-| Fatos (relatores) | `AssociacaoLongevidade` (LongevityMap), `EvidenciaEnvelhecimento` (GenAge), `AnotacaoFuncional` (GAF), `ExpressaoGenica` (HPA) |
+| Fatos (relatores) | `AssociacaoLongevidade` (LongevityMap + GWAS), `EvidenciaEnvelhecimento` (GenAge), `AnotacaoFuncional` (GAF), `ExpressaoGenica` (HPA) |
 | Enums | `Significancia`, `MotivoGenAge`, ambos com `SemInformacao` |
 | Relações comuns | `localizadaEm`, `subprocessoDe`, `ocorreEm`, `baseadaEm`, `mantidoPor`, `usaVocabulario`, `observa`, `relata` |
 
@@ -60,19 +60,19 @@ OWL, o script de instanciação e as consultas SPARQL (seção 5).
 
 | QC | Caminho no modelo | Fontes | Situação |
 |---|---|---|---|
-| QC1 genes e variantes associados | `AssociacaoLongevidade —avaliaElemento→ Gene/Variante`, filtrando `significancia = Significativa` | LongevityMap, SO (via VEP) | ✔ |
+| QC1 genes e variantes associados | `AssociacaoLongevidade —avaliaElemento→ Gene/Variante`, filtrando `significancia = Significativa` (e `pValor`/`trait` no GWAS) | LongevityMap, GWAS, SO (CONTEXT do GWAS; VEP na LongevityMap) | ✔ |
 | QC2 LongevityMap ∩ GenAge | Gene com `AssociacaoLongevidade` **e** `EvidenciaEnvelhecimento` (motivo ≠ `SemInformacao`) | LongevityMap, GenAge, HGNC | ✔ 125 genes |
 | QC3 processos GO | `Gene ← AnotacaoFuncional → ProcessoBiologico`, subindo por `subprocessoDe*` | GO, GAF | ✔ 122/125 genes anotados |
 | QC4 tipos celulares | (a) `AnotacaoFuncional —ocorreEm→ Celula`; (b) `Gene ← ExpressaoGenica → Celula` | CL + GAF; HPA | ✔ (a) parcial: 46/125; (b) amplo |
-| QC5 resultados compartilhados | Mesmo gene em relatores de bases diferentes (`registradaEm`, `curadaPor`, `anotadaEm`, `medidaEm`) | todas | ⚠ compara **genes**; associações entre bases só com o GWAS |
+| QC5 resultados compartilhados | Mesmo gene, variante ou estudo em relatores de bases diferentes (`registradaEm`, `curadaPor`, `anotadaEm`, `medidaEm`) | todas | ✔ LongevityMap × GWAS: 29 rsIDs, 61 genes, 7 PMIDs |
 
 ## 5. O que falta, em ordem
 
 | # | Tarefa | Situação |
 |---|---|---|
 | 1 | **Validar na extensão** (painel *Problems*) até zerar os erros | **pendente**. Pontos a conferir na seção 6 |
-| 2 | Decidir se o **GWAS** entra. Se entrar: filtrar por traços de longevidade (EFO) e, opcional, `pValor` (M3) | decisão |
-| 3 | Rodar `bash baixar_dados.sh -f` para registrar as versões | aguardando verificação do usuário |
+| 2 | **GWAS**: entra filtrado para longevidade, com `trait`, `pValor`, `Estudo.idNaFonte` e `observadaEm [1..*]` | **feito** (em avaliação) |
+| 3 | Rodar `bash baixar_dados.sh -f` para registrar as versões | **feito** (2026-11-26, 1,2 GB) |
 | 4 | Tabelas manuais: HPA → CL (155 tipos) e normalização de populações (81 rótulos) | pendente |
 | 5 | Exportar gUFO (`Tonto: Export to gUFO...`) e abrir no Protégé | pendente |
 | 6 | Script de instanciação, seguindo as regras de `PROBLEMAS_JUNCAO.md` seção 3 | pendente |

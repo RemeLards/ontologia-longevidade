@@ -16,6 +16,7 @@ As duas categorias de problema:
 | LongevityMap, GenAge etc. são **instâncias** de `ConjuntoDeDados` | Sem subkinds por tipo de base. O que cada base fornece aparece pelo relator que a usa |
 | GenAge sem `Estudo` | O CSV não tem referência por gene, então a fonte citada é a própria GenAge (Tacutu et al. 2018, NAR 46(D1):D1083) |
 | `Estudo observa [0..*] Populacao` | Estudos de laboratório (do GAF) não têm população |
+| `Estudo.idNaFonte [0..1]` | No GWAS, um artigo pode ter vários estudos (código GCST) |
 | `Populacao` é `kind`, não `collective` | Sem `Pessoa` no escopo, um collective ficaria sem membros. A população é identificada pelo rótulo do estudo |
 
 ## Problemas de modelagem (declarar no texto)
@@ -38,12 +39,19 @@ As duas categorias de problema:
 | Tipo de problema | Exemplo | Regra |
 |---|---|---|
 | Erro de digitação | `Italian (Nothern and Central)` | normalizar por tabela |
-| Rótulo composto | `Spanish and Italian` | **manter como uma população**. Isso preserva `observadaEm [1]`; separar obrigaria `[1..*]` |
+| Rótulo composto | `Spanish and Italian` | **separar** em populações. `observadaEm` agora é `[1..*]` |
 | Granularidade variável | `Italian`, `Italian (Sicily)` | sem hierarquia por ora; tratar como populações diferentes |
 | Espaço sobrando | `German ` | `strip()` |
 
 **Opcional:** alinhar os rótulos à **HANCESTRO** (ontologia de ancestralidade usada pelo
 GWAS Catalog). Ela não está na proposta e é baixada com `--opcionais`.
+
+### Populações do GWAS
+
+Vêm de `gwas-catalog-ancestry.tsv` (estágio `initial`): ancestralidade ampla
+(European, East Asian...) + país de recrutamento. Não são rótulos livres como na
+LongevityMap. Comparar as populações das duas bases exige uma tabela de equivalência
+(ou a HANCESTRO, opcional).
 
 ### Estudos
 

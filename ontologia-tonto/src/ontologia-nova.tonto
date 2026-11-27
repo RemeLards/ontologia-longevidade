@@ -17,6 +17,7 @@
 //   QC4  (a) ProcessoBiologico <- AnotacaoFuncional -> ocorreEm -> Celula      (GO + CL)
 //        (b) ProcessoBiologico <- AnotacaoFuncional -> Gene <- ExpressaoGenica -> Celula (HPA)
 //   QC5  qualquer relator -> registradaEm/curadaPor/anotadaEm/medidaEm -> ConjuntoDeDados
+//        (LongevityMap x GWAS: 29 rsIDs, 61 genes e 7 PMIDs em comum)
 //
 // Documentação: AVALIACAO_MODELO.md (estado geral)
 //               modulos/biologia/src/FONTES_FORA_DA_PROPOSTA.md
@@ -32,7 +33,7 @@ ontology longevidadehumana
 // Category (não-sortal rígido): agrupa dois kinds com identidades diferentes,
 // Gene e Variante, só para o relator poder apontar para "gene ou variante".
 // Não é mixin: mixin é semirrígido; gene e variante são sempre o que são.
-category ElementoGenomico
+category ElementoGenomico of functional-complexes
 
 kind Gene {
     simbolo: string [1]          // ex.: APOE (nome oficial da HGNC)
@@ -123,7 +124,8 @@ relation ConjuntoDeDados [0..*] -- usaVocabulario -- [0..*] Ontologia
 // 5. ESTUDOS E POPULAÇÕES                                     [mód. pesquisa]
 // ===========================================================================
 
-// Rótulo tirado do artigo pelo curador; texto livre (81 rótulos na LongevityMap).
+// LongevityMap: rótulo tirado do artigo pelo curador (81 rótulos, texto livre).
+// GWAS: ancestralidade + país de recrutamento (gwas-catalog-ancestry.tsv).
 // kind (não collective): sem Pessoa no escopo, um collective ficaria sem membros.
 // A população é identificada pelo rótulo do estudo.
 kind Populacao {
@@ -131,7 +133,9 @@ kind Populacao {
 }
 
 kind Estudo {
-    nome: string [1]             // título do artigo (via PubMed) ou "PMID:..."
+    idNaFonte: string [0..1]     // GWAS: código do estudo (ex.: GCST005467); um artigo
+                                 // pode ter vários estudos (9 dos 28 PMIDs do GWAS)
+    nome: string [1]             // título do artigo (via PubMed) ou coluna STUDY do GWAS
     pubmedId: string [0..1]      // onde foi publicado
 }
 
@@ -151,17 +155,21 @@ enum Significancia {
     SemInformacao                // 2 registros com a coluna Association vazia
 }
 
-// Um registro da LongevityMap: resultado de um estudo, numa população, sobre um
-// ou mais genes/variantes. Media a category ElementoGenomico: cada registro avalia
-// ao menos um elemento, mas não necessariamente um gene (2 registros só têm
-// variante) nem uma variante (116 só têm gene). Se é gene ou variante, diz o kind.
-//   432 registros: gene + variante | 116: só gene | 2: só variante
+// Um registro da LongevityMap ou do GWAS Catalog (filtrado para longevidade):
+// resultado de um estudo, em uma ou mais populações, sobre um ou mais genes/variantes.
+// Media a category ElementoGenomico: cada registro avalia ao menos um elemento, mas
+// não necessariamente um gene nem uma variante. Se é gene ou variante, diz o kind.
+//   LongevityMap (550): 432 gene + variante | 116 só gene | 2 só variante
+//   GWAS (708): avalia a variante; o gene vem pela posição (localizadaEm)
 relator AssociacaoLongevidade {
-    idNaFonte: string [1]                // coluna id (ex.: G481)
-    significancia: Significancia [1]     // vazia na fonte -> SemInformacao
+    idNaFonte: string [1]                // LongevityMap: coluna id (ex.: G481); GWAS: rsID + estudo
+    significancia: Significancia [1]     // vazia na fonte -> SemInformacao; GWAS: sempre Significativa
+    trait: string [0..1]                 // GWAS: termo EFO (ex.: EFO_0007796 parental longevity;
+                                         // 442 de 708 são longevidade dos pais). LongevityMap: vazio
+    pValor: number [0..1]                // GWAS: p-valor (todas <= 1e-5). LongevityMap não tem
     @mediation [0..*] -- avaliaElemento -- [1..*] (const) ElementoGenomico
     @mediation [0..*] -- obtidaEm -- [1] (const) Estudo
-    @mediation [0..*] -- observadaEm -- [1] (const) Populacao
+    @mediation [0..*] -- observadaEm -- [1..*] (const) Populacao   // GWAS: 4 estudos multiancestrais
     @mediation [0..*] -- registradaEm -- [1] (const) ConjuntoDeDados
 }
 

@@ -34,7 +34,7 @@ ontology biologialongevidade
 // Category (não-sortal rígido): agrupa dois kinds com identidades diferentes,
 // Gene e Variante, só para o relator poder apontar para "gene ou variante".
 // Não é mixin: mixin é semirrígido; gene e variante são sempre o que são.
-category ElementoGenomico
+category ElementoGenomico of functional-complexes
 
 kind Gene {
     simbolo: string [1]          // ex.: APOE (nome oficial da HGNC)

@@ -26,6 +26,12 @@ Documentos dos módulos:
 | `ExpressaoGenica.nCPM` | A unidade do HPA é nCPM (não TPM) |
 | `Variante.rsId [0..1]`: haplótipo sem rsId | `E2/E3/E4` = rs429358 + rs7412. Fica como Variante só com `descricao` |
 | `Celula.tipoCelular_idCL [1]`: tipo HPA → termo CL mais geral | 155 tipos no HPA, alguns sem termo exato |
+| `Populacao` é `kind` | Sem `Pessoa`, um collective ficaria sem membros |
+| GWAS entra **filtrado** para traços de longevidade | 708 associações, 49 estudos, 28 PMIDs; não precisa de `Fenotipo` |
+| `observadaEm [1..*] Populacao` | 4 estudos do GWAS são multiancestrais; rótulos compostos da LongevityMap podem ser separados |
+| `Estudo.idNaFonte [0..1]` | No GWAS, um artigo pode ter vários estudos (código GCST): 9 dos 28 PMIDs |
+| `AssociacaoLongevidade.trait [0..1]` | 442 das 708 associações do GWAS são longevidade **dos pais** (EFO_0007796) |
+| `AssociacaoLongevidade.pValor [0..1]` | O GWAS traz o p-valor (todas ≤ 1e-5); a LongevityMap não |
 
 ---
 
@@ -37,7 +43,7 @@ Só o que é escolha de modelo. O resto aparece na implementação (seção 3).
 |---|---|---|
 | M1 | **Termos GO e CL são instâncias**, não classes. Na UFO, processo é evento e tipo celular é tipo, mas aqui viram indivíduos para os relatores apontarem para eles | `ProcessoBiologico`, `Celula` |
 | M2 | **"Gene participa do processo" abrevia "o produto do gene participa"**. O GAF anota proteínas e RNAs, não genes | `AnotacaoFuncional` |
-| M3 | **Fenótipo "longevidade" implícito**. Se o GWAS entrar **filtrado** só para traços de longevidade (lista de termos EFO decidida pelo projeto), o modelo continua igual: todas as associações GWAS ficam `Significativa` (o catálogo só publica p ≤ 1e-5), e o p-valor vira atributo opcional. Declarar no texto quais traços contam como "longevidade" | `AssociacaoLongevidade` |
+| M3 | **"Longevidade" reúne traços diferentes**: longevidade própria (LongevityMap, *life span*), dos pais (*parental longevity*, 62% do GWAS), *healthspan* e idade ao morrer. O atributo `trait` (termo EFO) distingue no GWAS; declarar no texto quais traços contam | `AssociacaoLongevidade` |
 
 As simplificações do módulo de pesquisa (população e estudo como kind)
 estão em `modulos/pesquisa/src/PROBLEMAS.md`.
@@ -80,6 +86,30 @@ algumas viram uma frase de limitação no texto (marcadas com *texto*).
   variantes, 66 com vários genes). O par se recupera só pela posição (`localizadaEm`).
 - *texto*: o G481 tem 8 rsIDs, sem dizer se é um haplótipo ou se são 8 testes.
 - *texto*: a significância é só sim/não, sem p-valor nem direção do efeito.
+
+### 3.2b GWAS Catalog
+
+- **Filtro:** `MAPPED_TRAIT_URI` contém EFO_0007796 (*parental longevity*),
+  OBA_VT0005372 (*life span*), EFO_0009762 (*healthspan*), EFO_0005056 (*age at
+  death*) ou EFO_0022597 (*aging*), e **não** contém traços de outra natureza
+  (cognição EFO_0008354, menarca e menopausa EFO_0004703/4, tabagismo EFO_0006527).
+  Os traços de *survival* do GWAS são sobrevida a câncer e ficam fora.
+- **Associação:** uma por linha. `avaliaElemento` = a **variante** (rsID; 693 de 708
+  têm). O gene **não** entra na associação:
+  - o `MAPPED_GENE` é posicional (243 linhas "A - B", variante entre dois genes);
+  - o `REPORTED GENE(S)` é "NR" em 405 linhas;
+  - o gene vem por `Variante localizadaEm Gene`.
+- **`significancia`:** sempre `Significativa`. **`pValor`:** coluna `P-VALUE`.
+  **`trait`:** URI de `MAPPED_TRAIT_URI`.
+- **`tipoSO`:** coluna `CONTEXT` (intron_variant, missense_variant...), sem precisar
+  do VEP. O VEP só é necessário para as variantes da LongevityMap.
+- **Estudo:** um por `STUDY ACCESSION` (GCST), com `nome` = coluna `STUDY` e
+  `pubmedId` = `PUBMEDID`.
+- **População:** do `gwas-catalog-ancestry.tsv`, estágio `initial`: `BROAD ANCESTRAL
+  CATEGORY` + `COUNTRY OF RECRUITMENT`. 4 estudos têm mais de uma.
+- **Efeito:** `OR or BETA` está vazio em 180 linhas. Ainda não está no modelo.
+- *texto*: 62% das associações do GWAS são longevidade **dos pais**, medida no genoma
+  dos filhos (UK Biobank).
 
 ### 3.3 GenAge
 
@@ -146,6 +176,7 @@ algumas viram uma frase de limitação no texto (marcadas com *texto*).
 | LongevityMap | 550 registros: 432 gene + variante, 116 só gene, 2 só variante; 884 nomes de gene; 3.457 nomes de variante (3.023 rsIDs); 270 PMIDs; 81 rótulos de população |
 | GenAge | 307 genes (Build 21, 2023); 9 motivos; interseção com a LongevityMap: 125 |
 | GAF | 906.445 linhas; 204.919 de processo; 11.190 termos; cobertura: LongevityMap 716/884, GenAge 302/307, QC2 122/125 (120 com evidência experimental); 6.705 extensões `occurs_in(CL)`, 46/125 genes da QC2 |
+| GWAS | 1.206.717 associações no total; 708 de longevidade (442 parental), 49 estudos, 28 PMIDs; em comum com a LongevityMap: 29 rsIDs, 61 genes, 7 PMIDs |
 | GO | todos os termos usados no GAF existem no go-basic; "DNA repair": 217 genes direto, 475 com descendentes |
 | HPA | 3.107.242 linhas; 20.162 genes; 155 tipos celulares; unidade nCPM |
 | CL | 3.893 termos; só 342 com `capable_of` → GO (por isso a QC4 não usa isso) |
