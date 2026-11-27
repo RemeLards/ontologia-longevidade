@@ -1,6 +1,15 @@
 #!/usr/bin/env node
 // Valida o modelo e exporta para gUFO (Turtle), sem abrir o VS Code.
-// Usa o servidor MCP que vem na extensão Tonto (nemo-ufes.tonto-vscode) instalada.
+//
+// REQUISITOS
+//   1. VS Code com a extensão **Tonto** (OntoUML) instalada:
+//        code --install-extension nemo-ufes.tonto-vscode
+//      ou, no VS Code: Extensions (Ctrl+Shift+X) -> procurar "Tonto" (publisher NEMO/UFES).
+//      O script usa o servidor que vem dentro da extensão (out/tonto-mcp.mjs) e procura
+//      em ~/.vscode/extensions e ~/.vscode-server/extensions. Testado com a 0.9.4.
+//   2. Node.js (testado com o 20; o polyfill.cjs ao lado cobre o que falta antes do 21).
+//
+// Não precisa abrir o VS Code: basta a extensão estar instalada.
 //
 // Uso:  node scripts/exportar_gufo.mjs [arquivo.tonto]
 //       padrão: ontologia-tonto/src/ontologia-nova.tonto
@@ -23,7 +32,7 @@ const servidor = pastas.filter(existsSync)
   .flatMap((p) => readdirSync(p).filter((n) => n.startsWith("nemo-ufes.tonto-vscode-")).map((n) => join(p, n)))
   .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
   .map((p) => join(p, "out/tonto-mcp.mjs")).filter(existsSync).pop();
-if (!servidor) { console.error("Extensão Tonto não encontrada em ~/.vscode/extensions."); process.exit(1); }
+if (!servidor) { console.error("Extensão Tonto não encontrada em ~/.vscode/extensions.\nInstale com: code --install-extension nemo-ufes.tonto-vscode"); process.exit(1); }
 console.log(`Tonto: ${servidor}`);
 
 const proc = spawn(process.execPath, ["-r", join(aqui, "polyfill.cjs"), servidor, workspace], { stdio: ["pipe", "pipe", "inherit"] });
