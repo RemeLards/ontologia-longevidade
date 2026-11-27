@@ -39,8 +39,8 @@
       "y": 16
     },
     "longevidadehumana::Gene": {
-      "x": 584,
-      "y": 88
+      "x": 592,
+      "y": 168
     },
     "longevidadehumana::Variante": {
       "x": 888,
@@ -63,8 +63,8 @@
       "y": 1160
     },
     "longevidadehumana::ConjuntoDeDados": {
-      "x": -96,
-      "y": 720
+      "x": -128,
+      "y": 640
     },
     "longevidadehumana::Ontologia": {
       "x": 312,
@@ -99,12 +99,12 @@
       "y": 32
     },
     "longevidadehumana::EvidenciaEnvelhecimento": {
-      "x": 216,
-      "y": 576
+      "x": 208,
+      "y": 528
     },
     "longevidadehumana::AnotacaoFuncional": {
-      "x": 888,
-      "y": 632
+      "x": 848,
+      "y": 592
     },
     "longevidadehumana::ExpressaoGenica": {
       "x": 592,

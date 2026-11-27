@@ -24,11 +24,14 @@ kind Organizacao {
 // ONDE ESTÁ (recursos informacionais)
 // ===========================================================================
 
-kind RecursoInformacional
+// Category: base de dados e ontologia têm identidades diferentes (como Gene e Variante).
+// Kinds, não subkinds: o relator media ConjuntoDeDados, e um subkind mediado vira
+// "role" para o Tonto (subkind-founded-on-relator). Ser base de dados é rígido.
+category RecursoInformacional of functional-complexes
 
 // Base de dados que usamos. Instâncias:
 //   LongevityMap, GenAge-Human, GWAS Catalog, HGNC, GO Annotations (GAF), HPA
-subkind ConjuntoDeDados specializes RecursoInformacional {
+kind ConjuntoDeDados specializes RecursoInformacional {
     nome: string [1]             // ex.: LongevityMap
     url: string [1]              // ex.: https://genomics.senescence.info/longevity/
 }
@@ -36,7 +39,7 @@ subkind ConjuntoDeDados specializes RecursoInformacional {
 // Vocabulário controlado usado para padronizar os dados. Instâncias: GO, CL, SO
 // (ECO, se entrar). GO (a ontologia) e GO Annotations (o GAF) são recursos
 // diferentes, mantidos pela mesma organização.
-subkind Ontologia specializes RecursoInformacional {
+kind Ontologia specializes RecursoInformacional {
     nome: string [1]             // ex.: Gene Ontology
     url: string [1]              // ex.: http://purl.obolibrary.org/obo/go.owl
 }
@@ -70,11 +73,11 @@ kind Populacao {
 
 // A pesquisa em si (estudo de associação, experimento de laboratório...).
 // A publicação é só onde o estudo foi publicado: vira atributo.
+// Um estudo = um artigo (PMID); as análises GCST do GWAS do mesmo artigo viram um só.
 kind Estudo {
-    idNaFonte: string [0..1]     // GWAS: código do estudo (ex.: GCST005467)
     nome: string [1]             // ex.: título do artigo, ou "PMID:1859103" se não houver
-    pubmedId: string [0..1]      // onde foi publicado (LongevityMap: coluna PubMed;
-                                 // GAF: referência PMID:...)
+    pubmedId: string [1]         // LongevityMap: coluna PubMed (550/550); GWAS: PUBMEDID;
+                                 // GAF: referência PMID:...
 }
 
 // LongevityMap: todo estudo tem população (8 dos 270 têm mais de uma).

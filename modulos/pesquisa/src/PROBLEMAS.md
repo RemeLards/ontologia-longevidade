@@ -16,7 +16,7 @@ As duas categorias de problema:
 | LongevityMap, GenAge etc. são **instâncias** de `ConjuntoDeDados` | Sem subkinds por tipo de base. O que cada base fornece aparece pelo relator que a usa |
 | GenAge sem `Estudo` | O CSV não tem referência por gene, então a fonte citada é a própria GenAge (Tacutu et al. 2018, NAR 46(D1):D1083) |
 | `Estudo observa [0..*] Populacao` | Estudos de laboratório (do GAF) não têm população |
-| `Estudo.idNaFonte [0..1]` | No GWAS, um artigo pode ter vários estudos (código GCST) |
+| `Estudo` = artigo, `pubmedId [1]` | Todo registro da LongevityMap e do GWAS tem PMID. No GWAS, os vários GCST do mesmo artigo viram um Estudo; o GCST fica no `idNaFonte` da associação |
 | `Populacao` é `kind`, não `collective` | Sem `Pessoa` no escopo, um collective ficaria sem membros. A população é identificada pelo rótulo do estudo |
 
 ## Problemas de modelagem (declarar no texto)

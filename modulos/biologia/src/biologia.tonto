@@ -38,8 +38,7 @@ category ElementoGenomico of functional-complexes
 
 kind Gene {
     simbolo: string [1]          // ex.: APOE (nome oficial da HGNC)
-    hgncId: string [0..1]        // ex.: HGNC:613
-    entrezId: string [0..1]      // ex.: 348 (NCBI Gene; não muda; GenAge traz em todos)
+    hgncId: string [1]           // ex.: HGNC:613 (todo gene é normalizado na HGNC)
 }
 
 kind Variante {

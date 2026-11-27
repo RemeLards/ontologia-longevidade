@@ -8,11 +8,15 @@
 // Regras do modelo:
 //   - todo fato (relator) depende da fonte que o afirma (@mediation para a base);
 //   - sem @material: só relatores e relações comuns;
-//   - termos de GO, SO e CL entram como ID (atributo ou instância), não como classe.
+//   - termos de GO, SO e CL entram como ID (atributo ou instância), não como classe;
+//   - opcional ([0..1], [0..*]) só quando o domínio permite a falta (variante
+//     intergênica, anotação sem estudo, haplótipo sem rsID). Falta de dado de uma
+//     base se resolve no script (normaliza, deriva ou descarta), não no modelo.
 //
 // Caminhos das questões de competência:
 //   QC1  Gene/Variante <- avaliaElemento <- AssociacaoLongevidade (significancia)
 //   QC2  Gene avaliado numa AssociacaoLongevidade E com EvidenciaEnvelhecimento
+//        (gene fora da GenAge simplesmente não tem evidência: FILTER EXISTS no SPARQL)
 //   QC3  Gene <- AnotacaoFuncional -> ProcessoBiologico
 //   QC4  (a) ProcessoBiologico <- AnotacaoFuncional -> ocorreEm -> Celula      (GO + CL)
 //        (b) ProcessoBiologico <- AnotacaoFuncional -> Gene <- ExpressaoGenica -> Celula (HPA)
@@ -37,8 +41,8 @@ category ElementoGenomico of functional-complexes
 
 kind Gene {
     simbolo: string [1]          // ex.: APOE (nome oficial da HGNC)
-    hgncId: string [0..1]        // ex.: HGNC:613
-    entrezId: string [0..1]      // ex.: 348 (NCBI Gene; não muda; GenAge traz em todos)
+    hgncId: string [1]           // ex.: HGNC:613. Todo gene é normalizado na HGNC antes de
+                                 // entrar; nome sem solução vai para o log, não vira Gene
 }
 
 kind Variante {
@@ -86,6 +90,9 @@ kind Celula {
 // Contexto celular da própria anotação GO (coluna 16 do GAF: occurs_in(CL:...)).
 // Caminho da QC4 só com GO + CL; convive com o HPA (ExpressaoGenica).
 // Parcial: 46 dos 125 genes da QC2 têm esse contexto (124 tipos CL).
+// Relação comum (hint implied-relation-stereotype aceito): não é @mediation (opcional,
+// mínimo 0) nem dependência histórica; é só o contexto em que o processo ocorre.
+// EM ABERTO (M4): pode virar @mediation [1..*] depois de medir o recorte do GAF.
 relation AnotacaoFuncional [0..*] -- ocorreEm -- [0..*] Celula
 
 // ===========================================================================
@@ -96,16 +103,19 @@ kind Organizacao {
     nome: string [1]             // ex.: HAGR, NHGRI-EBI, HGNC, GO Consortium
 }
 
-kind RecursoInformacional
+// Category: base de dados e ontologia têm identidades diferentes (como Gene e Variante).
+// Kinds, não subkinds: o relator media ConjuntoDeDados, e um subkind mediado vira
+// "role" para o Tonto (subkind-founded-on-relator). Ser base de dados é rígido.
+category RecursoInformacional of functional-complexes
 
 // Instâncias: LongevityMap, GenAge-Human, GWAS Catalog, HGNC, GO Annotations (GAF), HPA
-subkind ConjuntoDeDados specializes RecursoInformacional {
+kind ConjuntoDeDados specializes RecursoInformacional {
     nome: string [1]
     url: string [1]
 }
 
 // Instâncias: GO, CL, SO
-subkind Ontologia specializes RecursoInformacional {
+kind Ontologia specializes RecursoInformacional {
     nome: string [1]
     url: string [1]
 }
@@ -132,11 +142,11 @@ kind Populacao {
     nome: string [1]
 }
 
+// Um estudo = um artigo (PMID). No GWAS, as análises (GCST) do mesmo artigo viram um
+// Estudo só; o que as diferencia (população, traço) já fica na AssociacaoLongevidade.
 kind Estudo {
-    idNaFonte: string [0..1]     // GWAS: código do estudo (ex.: GCST005467); um artigo
-                                 // pode ter vários estudos (9 dos 28 PMIDs do GWAS)
-    nome: string [1]             // título do artigo (via PubMed) ou coluna STUDY do GWAS
-    pubmedId: string [0..1]      // onde foi publicado
+    nome: string [1]             // título do artigo (via PubMed)
+    pubmedId: string [1]         // LongevityMap: 550/550; GWAS: 708/708; GAF: só quando PMID
 }
 
 relation Estudo [0..*] -- observa -- [0..*] Populacao
@@ -149,10 +159,10 @@ relation ConjuntoDeDados [0..*] -- relata -- [0..*] Estudo
 
 // --- 6.1 LongevityMap: associação com longevidade -------------------------
 
+// Os 2 registros da LongevityMap sem significância não entram (vão para o log).
 enum Significancia {
     Significativa,
-    NaoSignificativa,
-    SemInformacao                // 2 registros com a coluna Association vazia
+    NaoSignificativa
 }
 
 // Um registro da LongevityMap ou do GWAS Catalog (filtrado para longevidade):
@@ -162,11 +172,14 @@ enum Significancia {
 //   LongevityMap (550): 432 gene + variante | 116 só gene | 2 só variante
 //   GWAS (708): avalia a variante; o gene vem pela posição (localizadaEm)
 relator AssociacaoLongevidade {
-    idNaFonte: string [1]                // LongevityMap: coluna id (ex.: G481); GWAS: rsID + estudo
-    significancia: Significancia [1]     // vazia na fonte -> SemInformacao; GWAS: sempre Significativa
-    trait: string [0..1]                 // GWAS: termo EFO (ex.: EFO_0007796 parental longevity;
-                                         // 442 de 708 são longevidade dos pais). LongevityMap: vazio
-    pValor: number [0..1]                // GWAS: p-valor (todas <= 1e-5). LongevityMap não tem
+    idNaFonte: string [1]                // LongevityMap: coluna id (ex.: G481);
+                                         // GWAS: código GCST + rsID (ex.: GCST005467:rs429358)
+    significancia: Significancia [1]     // GWAS: sempre Significativa
+    trait: string [1]                    // termo do traço medido. GWAS: EFO de MAPPED_TRAIT_URI
+                                         // (442 de 708 são EFO_0007796 parental longevity);
+                                         // LongevityMap: sempre OBA_VT0005372 (life span)
+    pValor: number [0..1]                // GWAS: p-valor (todas <= 1e-5). A LongevityMap não
+                                         // publica o valor (só a significância)
     @mediation [0..*] -- avaliaElemento -- [1..*] (const) ElementoGenomico
     @mediation [0..*] -- obtidaEm -- [1] (const) Estudo
     @mediation [0..*] -- observadaEm -- [1..*] (const) Populacao   // GWAS: 4 estudos multiancestrais
@@ -185,14 +198,12 @@ enum MotivoGenAge {
     Model,
     Cell,
     HumanLink,
-    Human,
-    SemInformacao                // gene sem registro na GenAge (ver PROBLEMAS_JUNCAO.md, 3.3)
+    Human
 }
 
 // Curadoria: "este gene tem relação com envelhecimento, por estes motivos".
 // Sem Estudo: a fonte citada é a própria GenAge.
-// Genes da LongevityMap ausentes da GenAge recebem motivo SemInformacao (criado pelo
-// nosso script, não pela HAGR): deixa explícito que a GenAge não diz nada sobre eles.
+// Só os 307 genes da GenAge têm evidência; gene ausente da GenAge não tem nenhuma.
 relator EvidenciaEnvelhecimento {
     idNaFonte: string [1]                // coluna GenAge ID
     motivo: MotivoGenAge [1..*]
@@ -212,9 +223,11 @@ relator AnotacaoFuncional {
 }
 
 // Quando a referência é um PMID, a anotação se apoia num estudo.
-// Relação comum [0..1]: uma referência por linha (no máximo um estudo);
-// anotações IEA/GO_REF não vêm de estudo.
-relation AnotacaoFuncional [0..*] -- baseadaEm -- [0..1] Estudo
+// Dependência histórica: a anotação veio de um estudo já feito, e isso não muda
+// (const); um estudo só acumula anotações (addOnly).
+// [0..1]: uma referência por linha; anotações IEA/GO_REF não vêm de estudo.
+// (Não é @mediation: mediation exige mínimo 1.)
+@historicalDependence relation AnotacaoFuncional (addOnly) [0..*] -- baseadaEm -- [0..1] (const) Estudo
 
 // --- 6.4 HPA: expressão do gene por tipo celular ---------------------------
 // Recorte: só genes da LongevityMap/GenAge e nCPM >= 1 (o HPA tem 3,1 mi linhas).

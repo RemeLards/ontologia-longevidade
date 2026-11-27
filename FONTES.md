@@ -17,7 +17,7 @@ As versões baixadas ficam registradas em `VERSOES.txt`. O modelo é
 | LongevityMap (HAGR) | https://genomics.senescence.info/longevity/ | `longevity_genes.zip` | 25 KB | sim | `AssociacaoLongevidade`, `Estudo`, `Populacao` | QC1, QC2, QC5 |
 | GenAge-Human (HAGR) | https://genomics.senescence.info/genes/ | `human_genes.zip` | 9 KB | sim | `EvidenciaEnvelhecimento` | QC2 |
 | GO Annotations (GAF) | https://current.geneontology.org/products/pages/downloads.html | `goa_human.gaf.gz` | 15 MB | como parte da GO | `AnotacaoFuncional`, `ocorreEm` | QC3, QC4 |
-| HGNC | https://www.genenames.org/download/ | `hgnc_complete_set.txt` | 17 MB | sim | `Gene.simbolo/hgncId/entrezId` (normalização) | todas |
+| HGNC | https://www.genenames.org/download/ | `hgnc_complete_set.txt` | 17 MB | sim | `Gene.simbolo/hgncId` (normalização) | todas |
 | Human Protein Atlas (single cell) | https://www.proteinatlas.org/about/download | `rna_single_cell_type.tsv.zip` | 16 MB (150 MB descompactado) | **não** | `ExpressaoGenica` | QC4 |
 | Gene Ontology | https://geneontology.org/docs/download-ontology/ | `go-basic.obo` | 32 MB | sim | `ProcessoBiologico`, `subprocessoDe` | QC3, QC4 |
 | Cell Ontology | https://obofoundry.org/ontology/cl.html | `cl-basic.obo` | 4 MB | sim | `Celula.tipoCelular_idCL` | QC4 |

@@ -14,23 +14,30 @@ Documentos dos módulos:
 
 ## 1. Decisões já aplicadas no modelo
 
+**Critério para opcionais:** `[0..1]`/`[0..*]` só quando o domínio permite a falta
+(variante intergênica, anotação IEA sem estudo, haplótipo sem rsID, contexto celular).
+Falta de dado de uma base é resolvida no script: normalizar, derivar ou descartar (com
+log). Por isso saíram `Gene.entrezId`, `Estudo.idNaFonte` e os dois `SemInformacao`.
+
 | Decisão | Motivo |
 |---|---|
 | `Gene` e `Variante` são kinds; `category ElementoGenomico` acima deles | Identidades diferentes. A category só serve para o relator apontar para "gene ou variante" |
 | `AssociacaoLongevidade avaliaElemento [1..*] ElementoGenomico` | Nem todo registro tem gene (2) ou variante (116), e a `@mediation` não aceita mínimo 0 |
-| `Gene.entrezId [0..1]` | ID estável. A GenAge traz o Entrez nos 307 genes |
-| `Significancia` e `MotivoGenAge` com `SemInformacao` | Deixa a ausência explícita: 2 registros sem significância; genes fora da GenAge |
+| `Gene.hgncId [1]`, sem `entrezId` | Todo gene passa pela HGNC antes de entrar; o Entrez só serve para achar o HGNC (3.1) |
+| Sem `SemInformacao` nos enums | Ausência não vira relator: os 2 registros sem significância saem (log); gene fora da GenAge não tem `EvidenciaEnvelhecimento` |
 | `ProcessoBiologico subprocessoDe ProcessoBiologico` | Hierarquia da GO. Sem ela, "DNA repair" acha 217 genes em vez de 475 |
 | `AnotacaoFuncional ocorreEm Celula` + `ExpressaoGenica` (HPA) | QC4 por dois caminhos: curado (GO + CL) e por expressão (HPA) |
 | `AnotacaoFuncional.referencia [1]` e `baseadaEm [0..1] Estudo` | O GAF tem uma referência por linha |
+| `baseadaEm` é `@historicalDependence` (Estudo `const`, anotação `addOnly`) | A anotação veio de um estudo já feito; não pode ser `@mediation` porque é opcional |
+| `category RecursoInformacional`, kinds `ConjuntoDeDados` e `Ontologia` | Subkind mediado por relator o Tonto lê como role; ser base de dados é rígido |
 | `ExpressaoGenica.nCPM` | A unidade do HPA é nCPM (não TPM) |
 | `Variante.rsId [0..1]`: haplótipo sem rsId | `E2/E3/E4` = rs429358 + rs7412. Fica como Variante só com `descricao` |
 | `Celula.tipoCelular_idCL [1]`: tipo HPA → termo CL mais geral | 155 tipos no HPA, alguns sem termo exato |
 | `Populacao` é `kind` | Sem `Pessoa`, um collective ficaria sem membros |
 | GWAS entra **filtrado** para traços de longevidade | 708 associações, 49 estudos, 28 PMIDs; não precisa de `Fenotipo` |
 | `observadaEm [1..*] Populacao` | 4 estudos do GWAS são multiancestrais; rótulos compostos da LongevityMap podem ser separados |
-| `Estudo.idNaFonte [0..1]` | No GWAS, um artigo pode ter vários estudos (código GCST): 9 dos 28 PMIDs |
-| `AssociacaoLongevidade.trait [0..1]` | 442 das 708 associações do GWAS são longevidade **dos pais** (EFO_0007796) |
+| `Estudo` = artigo, `pubmedId [1]` | PMID em 550/550 registros da LongevityMap e 708/708 do GWAS. Os GCST do mesmo artigo (9 dos 28 PMIDs têm vários) viram um Estudo; o GCST vai no `idNaFonte` da associação |
+| `AssociacaoLongevidade.trait [1]` | 442 das 708 associações do GWAS são longevidade **dos pais** (EFO_0007796); a LongevityMap recebe OBA_VT0005372 (*life span*) |
 | `AssociacaoLongevidade.pValor [0..1]` | O GWAS traz o p-valor (todas ≤ 1e-5); a LongevityMap não |
 
 ---
@@ -43,7 +50,8 @@ Só o que é escolha de modelo. O resto aparece na implementação (seção 3).
 |---|---|---|
 | M1 | **Termos GO e CL são instâncias**, não classes. Na UFO, processo é evento e tipo celular é tipo, mas aqui viram indivíduos para os relatores apontarem para eles | `ProcessoBiologico`, `Celula` |
 | M2 | **"Gene participa do processo" abrevia "o produto do gene participa"**. O GAF anota proteínas e RNAs, não genes | `AnotacaoFuncional` |
-| M3 | **"Longevidade" reúne traços diferentes**: longevidade própria (LongevityMap, *life span*), dos pais (*parental longevity*, 62% do GWAS), *healthspan* e idade ao morrer. O atributo `trait` (termo EFO) distingue no GWAS; declarar no texto quais traços contam | `AssociacaoLongevidade` |
+| M3 | **"Longevidade" reúne traços diferentes**: longevidade própria (LongevityMap, *life span*), dos pais (*parental longevity*, 62% do GWAS), *healthspan* e idade ao morrer. O atributo `trait` (termo EFO/OBA) distingue; declarar no texto quais traços contam | `AssociacaoLongevidade` |
+| M4 | **Em aberto: `ocorreEm` opcional ou `@mediation`?** Biologicamente, o processo ocorre em alguma célula. Hoje é relação comum `[0..*]`, porque o relator é o **registro** do GAF, que existe sem célula (só cerca de 3% das linhas de processo têm `occurs_in`), e porque há processos de organismo (GO:0007568 *aging*, GO:0008340 *determination of adult lifespan*). **Decidir depois do recorte** (3.4b) | `AnotacaoFuncional ocorreEm Celula` |
 
 As simplificações do módulo de pesquisa (população e estudo como kind)
 estão em `modulos/pesquisa/src/PROBLEMAS.md`.
@@ -80,7 +88,8 @@ algumas viram uma frase de limitação no texto (marcadas com *texto*).
   (`E2/E3/E4`, `I/D`, `677C/T`, `HLA-B40`) ficam só com `descricao`.
   - Cuidado: o mesmo nome em registros diferentes deve virar a **mesma** Variante.
 - **Significância:** normalizar a grafia (`significant`, `non-significant`,
-  `Non-significant`). Vazio vira `SemInformacao`.
+  `Non-significant`). Os 2 registros vazios não entram (log).
+- **`trait`:** sempre OBA_VT0005372 (*life span*).
 - A população do registro tem de estar entre as que o `Estudo` observa.
 - *texto*: o CSV não diz qual variante é de qual gene (154 registros com várias
   variantes, 66 com vários genes). O par se recupera só pela posição (`localizadaEm`).
@@ -103,8 +112,8 @@ algumas viram uma frase de limitação no texto (marcadas com *texto*).
   **`trait`:** URI de `MAPPED_TRAIT_URI`.
 - **`tipoSO`:** coluna `CONTEXT` (intron_variant, missense_variant...), sem precisar
   do VEP. O VEP só é necessário para as variantes da LongevityMap.
-- **Estudo:** um por `STUDY ACCESSION` (GCST), com `nome` = coluna `STUDY` e
-  `pubmedId` = `PUBMEDID`.
+- **Estudo:** um por `PUBMEDID` (28), com `nome` = título do artigo. O `STUDY
+  ACCESSION` (GCST) entra no `idNaFonte` da associação (`GCST...:rs...`).
 - **População:** do `gwas-catalog-ancestry.tsv`, estágio `initial`: `BROAD ANCESTRAL
   CATEGORY` + `COUNTRY OF RECRUITMENT`. 4 estudos têm mais de uma.
 - **Efeito:** `OR or BETA` está vazio em 180 linhas. Ainda não está no modelo.
@@ -115,11 +124,10 @@ algumas viram uma frase de limitação no texto (marcadas com *texto*).
 
 - Uma `EvidenciaEnvelhecimento` por gene, com `motivo` separado por vírgula (64 genes
   têm mais de um).
-- Genes da LongevityMap ausentes da GenAge (cerca de 759) recebem uma evidência com
-  `SemInformacao`.
-  - Nas consultas, "genes com evidência" deve excluir esses registros.
+- Genes da LongevityMap ausentes da GenAge (cerca de 759) **não** recebem evidência.
+  Na QC2, "tem evidência" é `FILTER EXISTS { ?e :sobreGene ?g }`.
 - *texto*: a GenAge é curadoria seletiva (307 genes). A QC2 mede concordância entre
-  curadorias, e o `SemInformacao` é marcação do projeto.
+  curadorias; ausência na GenAge não significa que o gene não tem relação.
 - QC2 filtrada: oferecer uma versão sem `Putative` (80 genes de evidência fraca).
 
 ### 3.4 GAF (anotações GO)
@@ -140,6 +148,18 @@ algumas viram uma frase de limitação no texto (marcadas com *texto*).
 - **Volume:** recortar para os genes da LongevityMap e da GenAge (1.066). As linhas
   repetidas do mesmo par gene–termo continuam separadas se a evidência for diferente.
 - **QC3, versão padrão:** evidência experimental + IBA. A versão "tudo" inclui IEA.
+
+### 3.4b Medir para decidir o M4
+
+Depois de filtrar o GAF (3.4) e recortar para os genes do projeto, medir:
+1. quantas anotações têm `occurs_in(CL:...)`, no total e por gene da QC2;
+2. quantas são de processos de organismo ou multicelulares, sem célula possível
+   (descendentes de GO:0032501 *multicellular organismal process*, GO:0007568 *aging*);
+3. quantos genes a QC3 perderia se só entrassem anotações com célula.
+
+Se quase todas tiverem célula e a perda for pequena, `ocorreEm` vira `@mediation [1..*]`.
+Senão, continua relação comum, e o texto explica que a célula é contexto opcional do
+registro.
 
 ### 3.5 HPA (expressão)
 
