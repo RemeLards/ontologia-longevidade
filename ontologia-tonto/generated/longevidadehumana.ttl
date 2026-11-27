@@ -1,0 +1,664 @@
+# Written by `tonto gufo` from the tonto ontology longevidadehumana.
+# Change the model and export it again, rather than this file.
+
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix gufo: <http://purl.org/nemo/gufo#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@prefix longevidadehumana: <https://remelards.github.io/ontologia-longevidade/longevidadehumana#> .
+
+<https://remelards.github.io/ontologia-longevidade/longevidadehumana> a owl:Ontology ;
+    rdfs:label "Longevidade Humana" ;
+    rdfs:comment "Ontologia de Referência para a Longevidade Humana" ;
+    owl:imports <http://purl.org/nemo/gufo#> ;
+    dcterms:description "Ontologia de Referência para a Longevidade Humana" ;
+    dcterms:title "Longevidade Humana" ;
+    owl:versionInfo "0.2.0" ;
+    dcterms:license <https://opensource.org/licenses/MIT> ;
+    dcterms:creator "Breno Uliana De Angelo", "Rafael Fracalossi Freitas" ;
+    vann:preferredNamespacePrefix "longevidadehumana" ;
+    vann:preferredNamespaceUri "https://remelards.github.io/ontologia-longevidade/longevidadehumana#" .
+
+longevidadehumana:ElementoGenomico a owl:Class, gufo:Category ;
+    rdfs:label "ElementoGenomico" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf gufo:FunctionalComplex .
+
+longevidadehumana:Gene a owl:Class, gufo:Kind ;
+    rdfs:label "Gene" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        longevidadehumana:ElementoGenomico,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:Gene.simbolo ;
+          owl:minCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:Gene.hgncId ;
+          owl:cardinality "1"^^xsd:nonNegativeInteger ] .
+
+longevidadehumana:Variante a owl:Class, gufo:Kind ;
+    rdfs:label "Variante" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        longevidadehumana:ElementoGenomico,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:Variante.rsId ;
+          owl:maxCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:Variante.descricao ;
+          owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+longevidadehumana:ProcessoBiologico a owl:Class, gufo:Kind ;
+    rdfs:label "ProcessoBiologico" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        gufo:FunctionalComplex,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:ProcessoBiologico.goId ;
+          owl:cardinality "1"^^xsd:nonNegativeInteger ] .
+
+longevidadehumana:Celula a owl:Class, gufo:Kind ;
+    rdfs:label "Celula" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        gufo:FunctionalComplex,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:Celula.tipoCelular_idCL ;
+          owl:cardinality "1"^^xsd:nonNegativeInteger ] .
+
+longevidadehumana:Organizacao a owl:Class, gufo:Kind ;
+    rdfs:label "Organizacao" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        gufo:FunctionalComplex,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:Organizacao.nome ;
+          owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+longevidadehumana:RecursoInformacional a owl:Class, gufo:Category ;
+    rdfs:label "RecursoInformacional" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        gufo:FunctionalComplex,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:RecursoInformacional.mantidoPor ;
+          owl:someValuesFrom longevidadehumana:Organizacao ] .
+
+longevidadehumana:ConjuntoDeDados a owl:Class, gufo:Kind ;
+    rdfs:label "ConjuntoDeDados" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        longevidadehumana:RecursoInformacional,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:ConjuntoDeDados.nome ;
+          owl:minCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:ConjuntoDeDados.url ;
+          owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+longevidadehumana:Ontologia a owl:Class, gufo:Kind ;
+    rdfs:label "Ontologia" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        longevidadehumana:RecursoInformacional,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:Ontologia.nome ;
+          owl:minCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:Ontologia.url ;
+          owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+longevidadehumana:Populacao a owl:Class, gufo:Kind ;
+    rdfs:label "Populacao" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        gufo:FunctionalComplex,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:Populacao.nome ;
+          owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+longevidadehumana:Estudo a owl:Class, gufo:Kind ;
+    rdfs:label "Estudo" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        gufo:FunctionalComplex,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:Estudo.nome ;
+          owl:minCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:Estudo.pubmedId ;
+          owl:cardinality "1"^^xsd:nonNegativeInteger ] .
+
+longevidadehumana:Significancia a owl:Class, gufo:AbstractIndividualType ;
+    rdfs:label "Significancia" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf gufo:QualityValue ;
+    owl:equivalentClass [ a owl:Class ;
+                          owl:oneOf (
+                              longevidadehumana:Significancia.NaoSignificativa
+                              longevidadehumana:Significancia.Significativa
+                          ) ] .
+
+longevidadehumana:Significancia.Significativa a
+        owl:NamedIndividual,
+        longevidadehumana:Significancia ;
+    rdfs:label "Significativa" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> .
+
+longevidadehumana:Significancia.NaoSignificativa a
+        owl:NamedIndividual,
+        longevidadehumana:Significancia ;
+    rdfs:label "NaoSignificativa" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> .
+
+[] a owl:AllDifferent ;
+    owl:distinctMembers (
+        longevidadehumana:Significancia.NaoSignificativa
+        longevidadehumana:Significancia.Significativa
+    ) .
+
+longevidadehumana:AssociacaoLongevidade a owl:Class, gufo:Kind ;
+    rdfs:label "AssociacaoLongevidade" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        gufo:Relator,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AssociacaoLongevidade.idNaFonte ;
+          owl:cardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AssociacaoLongevidade.significancia ;
+          owl:onClass longevidadehumana:Significancia ;
+          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AssociacaoLongevidade.trait ;
+          owl:cardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AssociacaoLongevidade.pValor ;
+          owl:maxCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AssociacaoLongevidade.avaliaElemento ;
+          owl:someValuesFrom longevidadehumana:ElementoGenomico ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AssociacaoLongevidade.obtidaEm ;
+          owl:onClass longevidadehumana:Estudo ;
+          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AssociacaoLongevidade.observadaEm ;
+          owl:someValuesFrom longevidadehumana:Populacao ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AssociacaoLongevidade.registradaEm ;
+          owl:onClass longevidadehumana:ConjuntoDeDados ;
+          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ] .
+
+longevidadehumana:MotivoGenAge a owl:Class, gufo:AbstractIndividualType ;
+    rdfs:label "MotivoGenAge" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf gufo:QualityValue ;
+    owl:equivalentClass [ a owl:Class ;
+                          owl:oneOf (
+                              longevidadehumana:MotivoGenAge.Cell
+                              longevidadehumana:MotivoGenAge.Downstream
+                              longevidadehumana:MotivoGenAge.Functional
+                              longevidadehumana:MotivoGenAge.Human
+                              longevidadehumana:MotivoGenAge.HumanLink
+                              longevidadehumana:MotivoGenAge.Mammal
+                              longevidadehumana:MotivoGenAge.Model
+                              longevidadehumana:MotivoGenAge.Putative
+                              longevidadehumana:MotivoGenAge.Upstream
+                          ) ] .
+
+longevidadehumana:MotivoGenAge.Functional a owl:NamedIndividual, longevidadehumana:MotivoGenAge ;
+    rdfs:label "Functional" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> .
+
+longevidadehumana:MotivoGenAge.Putative a owl:NamedIndividual, longevidadehumana:MotivoGenAge ;
+    rdfs:label "Putative" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> .
+
+longevidadehumana:MotivoGenAge.Mammal a owl:NamedIndividual, longevidadehumana:MotivoGenAge ;
+    rdfs:label "Mammal" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> .
+
+longevidadehumana:MotivoGenAge.Downstream a owl:NamedIndividual, longevidadehumana:MotivoGenAge ;
+    rdfs:label "Downstream" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> .
+
+longevidadehumana:MotivoGenAge.Upstream a owl:NamedIndividual, longevidadehumana:MotivoGenAge ;
+    rdfs:label "Upstream" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> .
+
+longevidadehumana:MotivoGenAge.Model a owl:NamedIndividual, longevidadehumana:MotivoGenAge ;
+    rdfs:label "Model" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> .
+
+longevidadehumana:MotivoGenAge.Cell a owl:NamedIndividual, longevidadehumana:MotivoGenAge ;
+    rdfs:label "Cell" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> .
+
+longevidadehumana:MotivoGenAge.HumanLink a owl:NamedIndividual, longevidadehumana:MotivoGenAge ;
+    rdfs:label "HumanLink" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> .
+
+longevidadehumana:MotivoGenAge.Human a owl:NamedIndividual, longevidadehumana:MotivoGenAge ;
+    rdfs:label "Human" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> .
+
+[] a owl:AllDifferent ;
+    owl:distinctMembers (
+        longevidadehumana:MotivoGenAge.Cell
+        longevidadehumana:MotivoGenAge.Downstream
+        longevidadehumana:MotivoGenAge.Functional
+        longevidadehumana:MotivoGenAge.Human
+        longevidadehumana:MotivoGenAge.HumanLink
+        longevidadehumana:MotivoGenAge.Mammal
+        longevidadehumana:MotivoGenAge.Model
+        longevidadehumana:MotivoGenAge.Putative
+        longevidadehumana:MotivoGenAge.Upstream
+    ) .
+
+longevidadehumana:EvidenciaEnvelhecimento a owl:Class, gufo:Kind ;
+    rdfs:label "EvidenciaEnvelhecimento" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        gufo:Relator,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:EvidenciaEnvelhecimento.idNaFonte ;
+          owl:cardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:EvidenciaEnvelhecimento.motivo ;
+          owl:someValuesFrom longevidadehumana:MotivoGenAge ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:EvidenciaEnvelhecimento.sobreGene ;
+          owl:onClass longevidadehumana:Gene ;
+          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:EvidenciaEnvelhecimento.curadaPor ;
+          owl:onClass longevidadehumana:ConjuntoDeDados ;
+          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ] .
+
+longevidadehumana:AnotacaoFuncional a owl:Class, gufo:Kind ;
+    rdfs:label "AnotacaoFuncional" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        gufo:Relator,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AnotacaoFuncional.codigoEvidencia ;
+          owl:cardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AnotacaoFuncional.referencia ;
+          owl:cardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AnotacaoFuncional.anotaGene ;
+          owl:onClass longevidadehumana:Gene ;
+          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AnotacaoFuncional.emProcesso ;
+          owl:onClass longevidadehumana:ProcessoBiologico ;
+          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AnotacaoFuncional.anotadaEm ;
+          owl:onClass longevidadehumana:ConjuntoDeDados ;
+          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:AnotacaoFuncional.baseadaEm ;
+          owl:onClass longevidadehumana:Estudo ;
+          owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ] .
+
+longevidadehumana:ExpressaoGenica a owl:Class, gufo:Kind ;
+    rdfs:label "ExpressaoGenica" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:subClassOf
+        gufo:Relator,
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:ExpressaoGenica.nCPM ;
+          owl:cardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:ExpressaoGenica.expressaGene ;
+          owl:onClass longevidadehumana:Gene ;
+          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:ExpressaoGenica.emCelula ;
+          owl:onClass longevidadehumana:Celula ;
+          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ],
+        [ a owl:Restriction ;
+          owl:onProperty longevidadehumana:ExpressaoGenica.medidaEm ;
+          owl:onClass longevidadehumana:ConjuntoDeDados ;
+          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ] .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( longevidadehumana:Gene longevidadehumana:Variante ) .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( longevidadehumana:ConjuntoDeDados longevidadehumana:Ontologia ) .
+
+longevidadehumana:Gene.simbolo a owl:DatatypeProperty ;
+    rdfs:label "simbolo" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Gene ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:Gene.hgncId a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "hgncId" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Gene ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:Variante.rsId a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "rsId" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Variante ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:Variante.descricao a owl:DatatypeProperty ;
+    rdfs:label "descricao" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Variante ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:Variante.tipoSO a owl:DatatypeProperty ;
+    rdfs:label "tipoSO" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Variante ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:ProcessoBiologico.goId a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "goId" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:ProcessoBiologico ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:Celula.tipoCelular_idCL a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "tipoCelular_idCL" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Celula ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:Organizacao.nome a owl:DatatypeProperty ;
+    rdfs:label "nome" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Organizacao ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:ConjuntoDeDados.nome a owl:DatatypeProperty ;
+    rdfs:label "nome" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:ConjuntoDeDados ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:ConjuntoDeDados.url a owl:DatatypeProperty ;
+    rdfs:label "url" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:ConjuntoDeDados ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:Ontologia.nome a owl:DatatypeProperty ;
+    rdfs:label "nome" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Ontologia ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:Ontologia.url a owl:DatatypeProperty ;
+    rdfs:label "url" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Ontologia ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:Populacao.nome a owl:DatatypeProperty ;
+    rdfs:label "nome" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Populacao ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:Estudo.nome a owl:DatatypeProperty ;
+    rdfs:label "nome" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Estudo ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:Estudo.pubmedId a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "pubmedId" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Estudo ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:AssociacaoLongevidade.idNaFonte a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "idNaFonte" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AssociacaoLongevidade ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:AssociacaoLongevidade.significancia a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "significancia" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AssociacaoLongevidade ;
+    rdfs:range longevidadehumana:Significancia ;
+    rdfs:subPropertyOf gufo:hasReifiedQualityValue .
+
+longevidadehumana:AssociacaoLongevidade.trait a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "trait" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AssociacaoLongevidade ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:AssociacaoLongevidade.pValor a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "pValor" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AssociacaoLongevidade ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:EvidenciaEnvelhecimento.idNaFonte a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "idNaFonte" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:EvidenciaEnvelhecimento ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:EvidenciaEnvelhecimento.motivo a owl:ObjectProperty ;
+    rdfs:label "motivo" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:EvidenciaEnvelhecimento ;
+    rdfs:range longevidadehumana:MotivoGenAge ;
+    rdfs:subPropertyOf gufo:hasReifiedQualityValue .
+
+longevidadehumana:AnotacaoFuncional.codigoEvidencia a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "codigoEvidencia" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AnotacaoFuncional ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:AnotacaoFuncional.referencia a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "referencia" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AnotacaoFuncional ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:ExpressaoGenica.nCPM a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "nCPM" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:ExpressaoGenica ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf gufo:hasQualityValue .
+
+longevidadehumana:Variante.localizadaEm a owl:ObjectProperty ;
+    rdfs:label "localizadaEm" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Variante ;
+    rdfs:range longevidadehumana:Gene .
+
+longevidadehumana:ProcessoBiologico.subprocessoDe a owl:ObjectProperty ;
+    rdfs:label "subprocessoDe" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:ProcessoBiologico ;
+    rdfs:range longevidadehumana:ProcessoBiologico .
+
+longevidadehumana:AnotacaoFuncional.ocorreEm a owl:ObjectProperty ;
+    rdfs:label "ocorreEm" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AnotacaoFuncional ;
+    rdfs:range longevidadehumana:Celula .
+
+longevidadehumana:RecursoInformacional.mantidoPor a owl:ObjectProperty ;
+    rdfs:label "mantidoPor" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:RecursoInformacional ;
+    rdfs:range longevidadehumana:Organizacao .
+
+longevidadehumana:ConjuntoDeDados.usaVocabulario a owl:ObjectProperty ;
+    rdfs:label "usaVocabulario" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:ConjuntoDeDados ;
+    rdfs:range longevidadehumana:Ontologia .
+
+longevidadehumana:Estudo.observa a owl:ObjectProperty ;
+    rdfs:label "observa" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:Estudo ;
+    rdfs:range longevidadehumana:Populacao .
+
+longevidadehumana:ConjuntoDeDados.relata a owl:ObjectProperty ;
+    rdfs:label "relata" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:ConjuntoDeDados ;
+    rdfs:range longevidadehumana:Estudo .
+
+longevidadehumana:AssociacaoLongevidade.avaliaElemento a owl:ObjectProperty ;
+    rdfs:label "avaliaElemento" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AssociacaoLongevidade ;
+    rdfs:range longevidadehumana:ElementoGenomico ;
+    rdfs:subPropertyOf gufo:mediates .
+
+longevidadehumana:AssociacaoLongevidade.obtidaEm a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "obtidaEm" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AssociacaoLongevidade ;
+    rdfs:range longevidadehumana:Estudo ;
+    rdfs:subPropertyOf gufo:mediates .
+
+longevidadehumana:AssociacaoLongevidade.observadaEm a owl:ObjectProperty ;
+    rdfs:label "observadaEm" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AssociacaoLongevidade ;
+    rdfs:range longevidadehumana:Populacao ;
+    rdfs:subPropertyOf gufo:mediates .
+
+longevidadehumana:AssociacaoLongevidade.registradaEm a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "registradaEm" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AssociacaoLongevidade ;
+    rdfs:range longevidadehumana:ConjuntoDeDados ;
+    rdfs:subPropertyOf gufo:mediates .
+
+longevidadehumana:EvidenciaEnvelhecimento.sobreGene a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "sobreGene" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:EvidenciaEnvelhecimento ;
+    rdfs:range longevidadehumana:Gene ;
+    rdfs:subPropertyOf gufo:mediates .
+
+longevidadehumana:EvidenciaEnvelhecimento.curadaPor a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "curadaPor" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:EvidenciaEnvelhecimento ;
+    rdfs:range longevidadehumana:ConjuntoDeDados ;
+    rdfs:subPropertyOf gufo:mediates .
+
+longevidadehumana:AnotacaoFuncional.anotaGene a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "anotaGene" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AnotacaoFuncional ;
+    rdfs:range longevidadehumana:Gene ;
+    rdfs:subPropertyOf gufo:mediates .
+
+longevidadehumana:AnotacaoFuncional.emProcesso a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "emProcesso" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AnotacaoFuncional ;
+    rdfs:range longevidadehumana:ProcessoBiologico ;
+    rdfs:subPropertyOf gufo:mediates .
+
+longevidadehumana:AnotacaoFuncional.anotadaEm a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "anotadaEm" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AnotacaoFuncional ;
+    rdfs:range longevidadehumana:ConjuntoDeDados ;
+    rdfs:subPropertyOf gufo:mediates .
+
+longevidadehumana:AnotacaoFuncional.baseadaEm a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "baseadaEm" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:AnotacaoFuncional ;
+    rdfs:range longevidadehumana:Estudo ;
+    rdfs:subPropertyOf gufo:historicallyDependsOn .
+
+longevidadehumana:ExpressaoGenica.expressaGene a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "expressaGene" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:ExpressaoGenica ;
+    rdfs:range longevidadehumana:Gene ;
+    rdfs:subPropertyOf gufo:mediates .
+
+longevidadehumana:ExpressaoGenica.emCelula a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "emCelula" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:ExpressaoGenica ;
+    rdfs:range longevidadehumana:Celula ;
+    rdfs:subPropertyOf gufo:mediates .
+
+longevidadehumana:ExpressaoGenica.medidaEm a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "medidaEm" ;
+    rdfs:isDefinedBy <https://remelards.github.io/ontologia-longevidade/longevidadehumana> ;
+    rdfs:domain longevidadehumana:ExpressaoGenica ;
+    rdfs:range longevidadehumana:ConjuntoDeDados ;
+    rdfs:subPropertyOf gufo:mediates .
+
+[] a owl:AllDisjointClasses ;
+    owl:members (
+        longevidadehumana:AnotacaoFuncional
+        longevidadehumana:AssociacaoLongevidade
+        longevidadehumana:Celula
+        longevidadehumana:ConjuntoDeDados
+        longevidadehumana:Estudo
+        longevidadehumana:EvidenciaEnvelhecimento
+        longevidadehumana:ExpressaoGenica
+        longevidadehumana:Gene
+        longevidadehumana:Ontologia
+        longevidadehumana:Organizacao
+        longevidadehumana:Populacao
+        longevidadehumana:ProcessoBiologico
+        longevidadehumana:Variante
+    ) .
+
+dcterms:creator a owl:AnnotationProperty .
+
+dcterms:description a owl:AnnotationProperty .
+
+dcterms:license a owl:AnnotationProperty .
+
+dcterms:title a owl:AnnotationProperty .
+
+vann:preferredNamespacePrefix a owl:AnnotationProperty .
+
+vann:preferredNamespaceUri a owl:AnnotationProperty .

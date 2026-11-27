@@ -75,7 +75,7 @@ existem o script de instanciação e as consultas SPARQL (seção 5).
 | 2 | **GWAS**: entra filtrado para longevidade, com `trait`, `pValor` e `observadaEm [1..*]`; `Estudo` = artigo (PMID) | **feito** (em avaliação) |
 | 3 | Rodar `bash baixar_dados.sh -f` para registrar as versões | **feito** (2026-11-26, 1,2 GB) |
 | 4 | Tabelas manuais: HPA → CL (155 tipos) e normalização de populações (81 rótulos) | pendente |
-| 5 | Exportar gUFO (`Tonto: Export to gUFO...`) e abrir no Protégé | pendente |
+| 5 | Exportar gUFO (`Tonto: Export to gUFO...` ou `node scripts/exportar_gufo.mjs`) e abrir no Protégé | export **feito** (`ontologia-tonto/generated/longevidadehumana.ttl`); falta abrir no Protégé |
 | 6 | Script de instanciação, seguindo as regras de `PROBLEMAS_JUNCAO.md` seção 3 | pendente |
 | 6b | Decidir o M4 (`ocorreEm` como mediation?) com os números do recorte (`PROBLEMAS_JUNCAO.md` 3.4b) | pendente, depende do 6 |
 | 7 | Uma consulta SPARQL por QC (`consultas/qc1.rq` … `qc5.rq`) | pendente |

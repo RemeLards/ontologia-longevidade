@@ -28,6 +28,13 @@
 //               modulos/pesquisa/src/PROBLEMAS.md
 //               ontologia-tonto/src/PROBLEMAS_JUNCAO.md (modelagem e implementação)
 
+/// Ontologia de Referência para a Longevidade Humana
+/// @label Longevidade Humana
+/// @namespace https://remelards.github.io/ontologia-longevidade/longevidadehumana#
+/// @version 0.2.0
+/// @license https://opensource.org/licenses/MIT
+/// @creator Rafael Fracalossi Freitas
+/// @creator Breno Uliana De Angelo
 ontology longevidadehumana
 
 // ===========================================================================
@@ -41,12 +48,12 @@ category ElementoGenomico of functional-complexes
 
 kind Gene {
     simbolo: string [1]          // ex.: APOE (nome oficial da HGNC)
-    hgncId: string [1]           // ex.: HGNC:613. Todo gene é normalizado na HGNC antes de
+    hgncId: const string [1]           // ex.: HGNC:613. Todo gene é normalizado na HGNC antes de
                                  // entrar; nome sem solução vai para o log, não vira Gene
 }
 
 kind Variante {
-    rsId: string [0..1]          // ex.: rs7412 (falta em parte da LongevityMap)
+    rsId: const string [0..1]          // ex.: rs7412 (falta em parte da LongevityMap)
                                  // haplótipo (E2/E3/E4 = rs429358+rs7412) fica sem rsId,
                                  // só com descricao (PROBLEMAS_JUNCAO.md, seção 1)
     descricao: string [1]        // rótulo da fonte (ex.: -308G/A, E2/E3/E4)
@@ -68,7 +75,7 @@ relation Variante [0..*] -- localizadaEm -- [0..*] Gene
 // ===========================================================================
 
 kind ProcessoBiologico {
-    goId: string [1]             // ID do termo GO (não do gene)
+    goId: const string [1]             // ID do termo GO (não do gene)
 }
 
 // Hierarquia da GO entre os termos (is_a e part_of do go-basic). Auto-relação:
@@ -82,7 +89,7 @@ relation ProcessoBiologico [0..*] -- subprocessoDe -- [0..*] ProcessoBiologico
 // ===========================================================================
 
 kind Celula {
-    tipoCelular_idCL: string [1]     // ex.: CL:0000182 (hepatocyte)
+    tipoCelular_idCL: const string [1]     // ex.: CL:0000182 (hepatocyte)
                                      // tipo do HPA sem termo exato -> termo CL mais geral
                                      // (ex.: "other brain neurons" -> CL:0000540 neuron)
 }
@@ -146,7 +153,7 @@ kind Populacao {
 // Estudo só; o que as diferencia (população, traço) já fica na AssociacaoLongevidade.
 kind Estudo {
     nome: string [1]             // título do artigo (via PubMed)
-    pubmedId: string [1]         // LongevityMap: 550/550; GWAS: 708/708; GAF: só quando PMID
+    pubmedId: const string [1]         // LongevityMap: 550/550; GWAS: 708/708; GAF: só quando PMID
 }
 
 relation Estudo [0..*] -- observa -- [0..*] Populacao
@@ -172,13 +179,13 @@ enum Significancia {
 //   LongevityMap (550): 432 gene + variante | 116 só gene | 2 só variante
 //   GWAS (708): avalia a variante; o gene vem pela posição (localizadaEm)
 relator AssociacaoLongevidade {
-    idNaFonte: string [1]                // LongevityMap: coluna id (ex.: G481);
+    idNaFonte: const string [1]                // LongevityMap: coluna id (ex.: G481);
                                          // GWAS: código GCST + rsID (ex.: GCST005467:rs429358)
-    significancia: Significancia [1]     // GWAS: sempre Significativa
-    trait: string [1]                    // termo do traço medido. GWAS: EFO de MAPPED_TRAIT_URI
+    significancia: const Significancia [1]     // GWAS: sempre Significativa
+    trait: const string [1]                    // termo do traço medido. GWAS: EFO de MAPPED_TRAIT_URI
                                          // (442 de 708 são EFO_0007796 parental longevity);
                                          // LongevityMap: sempre OBA_VT0005372 (life span)
-    pValor: number [0..1]                // GWAS: p-valor (todas <= 1e-5). A LongevityMap não
+    pValor: const number [0..1]                // GWAS: p-valor (todas <= 1e-5). A LongevityMap não
                                          // publica o valor (só a significância)
     @mediation [0..*] -- avaliaElemento -- [1..*] (const) ElementoGenomico
     @mediation [0..*] -- obtidaEm -- [1] (const) Estudo
@@ -205,7 +212,7 @@ enum MotivoGenAge {
 // Sem Estudo: a fonte citada é a própria GenAge.
 // Só os 307 genes da GenAge têm evidência; gene ausente da GenAge não tem nenhuma.
 relator EvidenciaEnvelhecimento {
-    idNaFonte: string [1]                // coluna GenAge ID
+    idNaFonte: const string [1]                // coluna GenAge ID
     motivo: MotivoGenAge [1..*]
     @mediation [0..*] -- sobreGene -- [1] (const) Gene
     @mediation [0..*] -- curadaPor -- [1] (const) ConjuntoDeDados
@@ -215,8 +222,8 @@ relator EvidenciaEnvelhecimento {
 
 // Uma linha do goa_human.gaf (aspecto P, sem qualificador NOT).
 relator AnotacaoFuncional {
-    codigoEvidencia: string [1]  // GO Evidence Code: IDA, IMP ... IEA (talvez ECO)
-    referencia: string [1]       // PMID:... ou GO_REF:... (método)
+    codigoEvidencia: const string [1]  // GO Evidence Code: IDA, IMP ... IEA (talvez ECO)
+    referencia: const string [1]       // PMID:... ou GO_REF:... (método)
     @mediation [0..*] -- anotaGene -- [1] (const) Gene
     @mediation [0..*] -- emProcesso -- [1] (const) ProcessoBiologico
     @mediation [0..*] -- anotadaEm -- [1] (const) ConjuntoDeDados
@@ -233,7 +240,7 @@ relator AnotacaoFuncional {
 // Recorte: só genes da LongevityMap/GenAge e nCPM >= 1 (o HPA tem 3,1 mi linhas).
 
 relator ExpressaoGenica {
-    nCPM: number [1]             // nível de expressão (unidade do HPA: normalized counts per million)
+    nCPM: const number [1]             // nível de expressão (unidade do HPA: normalized counts per million)
     @mediation [0..*] -- expressaGene -- [1] (const) Gene
     @mediation [0..*] -- emCelula -- [1] (const) Celula
     @mediation [0..*] -- medidaEm -- [1] (const) ConjuntoDeDados

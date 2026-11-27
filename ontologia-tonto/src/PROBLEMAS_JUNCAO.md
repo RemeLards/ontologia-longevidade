@@ -29,6 +29,7 @@ log). Por isso saíram `Gene.entrezId`, `Estudo.idNaFonte` e os dois `SemInforma
 | `AnotacaoFuncional ocorreEm Celula` + `ExpressaoGenica` (HPA) | QC4 por dois caminhos: curado (GO + CL) e por expressão (HPA) |
 | `AnotacaoFuncional.referencia [1]` e `baseadaEm [0..1] Estudo` | O GAF tem uma referência por linha |
 | `baseadaEm` é `@historicalDependence` (Estudo `const`, anotação `addOnly`) | A anotação veio de um estudo já feito; não pode ser `@mediation` porque é opcional |
+| Identificadores e atributos de relator são `const` | Não mudam (se a base corrigir, é outro registro). No gUFO viram `owl:cardinality 1`; atributo que muda (`simbolo`, `nome`, `url`, `descricao`) só ganha mínimo 1, porque o OWL não tem tempo |
 | `category RecursoInformacional`, kinds `ConjuntoDeDados` e `Ontologia` | Subkind mediado por relator o Tonto lê como role; ser base de dados é rígido |
 | `ExpressaoGenica.nCPM` | A unidade do HPA é nCPM (não TPM) |
 | `Variante.rsId [0..1]`: haplótipo sem rsId | `E2/E3/E4` = rs429358 + rs7412. Fica como Variante só com `descricao` |

@@ -63,16 +63,16 @@
       "y": 560
     },
     "biologialongevidade::Celula": {
-      "x": 896,
-      "y": 344
+      "x": 864,
+      "y": 304
     },
     "biologialongevidade::TipoCelular": {
       "x": 896,
       "y": 568
     },
     "biologialongevidade::ExpressaoGenica": {
-      "x": 800,
-      "y": 496
+      "x": 824,
+      "y": 488
     },
     "biologialongevidade::ElementoGenomico": {
       "x": 488,
